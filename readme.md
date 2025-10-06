@@ -1,4 +1,4 @@
-#  Jeep jam hek yea
+#  Jeep jam hek yea 🚙
 ## Members
 - Jules Adrian Nino Lada
 - Frances Anna Gaea Mutia
