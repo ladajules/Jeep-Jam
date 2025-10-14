@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class OnboardingPage1 extends StatelessWidget {
@@ -17,7 +16,7 @@ class OnboardingPage1 extends StatelessWidget {
             bgColor: const Color.fromARGB(255, 240, 93, 82),
           ),
           OnboardingPageModel(
-            title: 'Navigate with Ease.',
+            title: 'Navigate with Ease',
             description: 'Get reliable jeepney codes wherever you are in the city.',
             image: const Image(image: AssetImage('assets/tutorial_icons/route.png')),
             // imageUrl: 'https://i.ibb.co/LvmZypG/storefront-illustration-2.png',
@@ -39,14 +38,12 @@ class OnboardingPage1 extends StatelessWidget {
             bgColor: const Color.fromARGB(255, 240, 93, 82),
           ),
         ],
-        // onSkip: (){
-        //   Navigator.pushReplacement(context, MaterialPageRoute( builder: (context) => const LoadingScreenMats(),),
-        //   );
-        // },
-        // onFinish: (){
-        //   Navigator.pushReplacement(context, MaterialPageRoute(builder:(context) => const LoadingScreenMats(),),
-        //   );
-        // },
+        onSkip: (){
+          Navigator.pushNamed(context, '/homepage');
+        },
+        onFinish: (){
+          Navigator.pushNamed(context, '/homepage');
+        },
       ),
     );
   }
