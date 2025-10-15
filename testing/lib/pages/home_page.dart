@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -11,10 +12,24 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
+  // Function for the bottom nav bar
+  void _navigationBottomBar(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  // List of pages for the bottom nav bar
+  // final List<Widget> _pages = [
+  //   TestingHomePage(),
+  //   TestingMapPage(),
+  //   TestingSavedroutesPage(),
+  //   TestingSettingsPage(),
+  // ];
+
   @override
   Widget build(BuildContext context) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Jeep Jam"), centerTitle: true),
         backgroundColor: Colors.white,
         body: const Center( 
           child: Column(
@@ -52,11 +67,7 @@ class _HomePageState extends State<HomePage> {
           currentIndex: _selectedIndex,
           selectedItemColor: const Color(0xff6200ee),
           unselectedItemColor: const Color(0xff757575),
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
+          onTap: _navigationBottomBar,
           items: _navBarItems,
         ),
 

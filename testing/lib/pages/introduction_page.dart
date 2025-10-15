@@ -39,10 +39,10 @@ class OnboardingPage1 extends StatelessWidget {
           ),
         ],
         onSkip: (){
-          Navigator.pushNamed(context, '/homepage');
+          Navigator.pushReplacementNamed(context, '/homepage');
         },
         onFinish: (){
-          Navigator.pushNamed(context, '/homepage');
+          Navigator.pushReplacementNamed(context, '/homepage');
         },
       ),
     );
