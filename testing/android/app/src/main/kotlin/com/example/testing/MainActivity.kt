@@ -1,4 +1,4 @@
-package com.example.testing
+package com.mgt.jeepjam
 
 import io.flutter.embedding.android.FlutterActivity
 
