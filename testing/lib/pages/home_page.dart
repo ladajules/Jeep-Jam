@@ -31,37 +31,120 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
       return Scaffold(
         backgroundColor: Colors.white,
-        body: const Center( 
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SafeArea(child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image(
-                image: AssetImage('assets/jeeplogo.png'),
-                width: 150,
+              // Image(
+              //   image: AssetImage('assets/jeeplogo.png'),
+              //   width: 150,
+              // ),
+          
+              // SizedBox(height: 20),
+          
+            Text(
+              'Current Location',
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                
               ),
-
-              SizedBox(height: 20),
-
-              Text(
-                'Welcome to Jeep Jam!',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+            ),
+          
+            Text(
+              'addres placeholder',
+              style: TextStyle(
+                fontSize: 15,
+                
+              ),
+            ),
+            
+            Padding(
+              padding: const EdgeInsets.only(top: 14.0),
+              child: Container(
+                width: double.infinity,
+                height: 160,
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
+               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                 children: [
+                   Text(
+                    'Im the map that shows the current loc',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: const Color.fromARGB(255, 0, 0, 0)
+                    ),
+                   ),
+                 ],
+               ),
               ),
-
-              Text(
-                'Travel with Confidence', 
-                style: TextStyle(
-                  fontSize: 18,
+            ),
+              // Text(
+              //   'Travel with Confidence', 
+              //   style: TextStyle(
+              //     fontSize: 18,
+              //   ),
+              // ),
+          
+            Padding(
+              padding: const EdgeInsets.only(top: 7.0),
+              child: Container(
+                width: double.infinity,
+                height: 240,
+                // decoration: BoxDecoration(
+                //   color: Colors.grey,
+                //   borderRadius: BorderRadius.all(Radius.circular(10)),
+                // ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Hows the weather?', 
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.all(Radius.circular(12))
+                      ),
+                      child: Center(
+                        child: Text(
+                          'weather api here!',
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
                 ),
+
+                
+
               ),
+            )
+
 
             ],
           ),
-
-        ),
+          
+          ),
+        ), 
 
         bottomNavigationBar: SalomonBottomBar(
           currentIndex: _selectedIndex,
