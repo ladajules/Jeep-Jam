@@ -9,32 +9,29 @@ class OnboardingPage1 extends StatelessWidget {
       body: OnboardingPagePresenter(  
         pages: [
           OnboardingPageModel(
-            title: 'Find Your Route Easily',
+            title: 'Find Your Route Easily', //route icon
             description:
                 'Just enter your current and destination locations to see the right jeepney codes instantly.',
-            image: const Image(image: AssetImage('assets/tutorial_icons/route.png')),
+            image: Image.asset('assets/tutorial_icons/wired-lineal-18-location-pin-loop-roll.gif'),
             bgColor: const Color.fromARGB(255, 240, 93, 82),
           ),
           OnboardingPageModel(
-            title: 'Navigate with Ease',
+            title: 'Navigate with Ease', //
             description: 'Get reliable jeepney codes wherever you are in the city.',
-            image: const Image(image: AssetImage('assets/tutorial_icons/route.png')),
-            // imageUrl: 'https://i.ibb.co/LvmZypG/storefront-illustration-2.png',
+            image: Image.asset('assets/tutorial_icons/wired-lineal-220-arrow-9-hover-pointing.gif'),
             bgColor: const Color.fromARGB(255, 240, 93, 82),
           ),
           OnboardingPageModel(
             title: 'Save Time',
             description:
                 'Plan your commute smartly and avoid taking the wrong route.',
-            image: const Image(image: AssetImage('assets/tutorial_icons/route.png')),
-            // imageUrl: 'https://i.ibb.co/420D7VP/building.png',
+            image: Image.asset('assets/tutorial_icons/wired-lineal-45-clock-time-loop-oscillate.gif'),
             bgColor: const Color.fromARGB(255, 240, 93, 82),
           ),
           OnboardingPageModel(
             title: 'Discover Local Routes',
             description: 'Explore and learn the jeepney codes that connect Cebu and Mandaue City.',
-            image: const Image(image: AssetImage('assets/tutorial_icons/route.png')),
-            // imageUrl: 'https://i.ibb.co/cJqsPSB/scooter.png',
+            image: Image.asset('assets/tutorial_icons/wired-lineal-19-magnifier-zoom-search-loop-spin.gif'),
             bgColor: const Color.fromARGB(255, 240, 93, 82),
           ),
         ],
@@ -114,12 +111,13 @@ class _OnboardingPageState extends State<OnboardingPagePresenter> {
                                       ?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: item.textColor,
+                                        fontSize: 26
                                       ),
                                 ),
                               ),
                               Container(
                                 constraints: const BoxConstraints(
-                                  maxWidth: 280,
+                                  maxWidth: 350,
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24.0,
@@ -129,7 +127,8 @@ class _OnboardingPageState extends State<OnboardingPagePresenter> {
                                   item.description,
                                   textAlign: TextAlign.center,
                                   style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(color: item.textColor),
+                                      ?.copyWith(color: item.textColor, fontSize: 18),
+                                      
                                 ),
                               ),
                             ],
@@ -171,10 +170,11 @@ class _OnboardingPageState extends State<OnboardingPagePresenter> {
                     TextButton(
                       style: TextButton.styleFrom(
                         visualDensity: VisualDensity.comfortable,
-                        foregroundColor: Colors.white,
+                        foregroundColor: Colors.white, 
+                        overlayColor: Color.fromRGBO(87, 17, 17, 1),
                         textStyle: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold, 
                         ),
                       ),
                       onPressed: () {
@@ -186,9 +186,10 @@ class _OnboardingPageState extends State<OnboardingPagePresenter> {
                       style: TextButton.styleFrom(
                         visualDensity: VisualDensity.comfortable,
                         foregroundColor: Colors.white,
+                        overlayColor: Color.fromRGBO(87, 17, 17, 1),
                         textStyle: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold, 
                         ),
                       ),
                       onPressed: () {
