@@ -37,10 +37,10 @@ class _TutorialPageState extends State<TutorialPage>{
   @override
   void initState(){
     super.initState();
-    _CheckFirstTime();
+    _checkFirstTime();
   }
 
-  Future <void> _CheckFirstTime() async{
+  Future <void> _checkFirstTime() async{
     final prefs = await SharedPreferences.getInstance();
     bool? hasSeenTutorial = prefs.getBool('SeenTutorial');
 
