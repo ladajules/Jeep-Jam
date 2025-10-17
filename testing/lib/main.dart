@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:testing/pages/introduction_page.dart';
 import 'package:testing/pages/home_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -23,4 +24,39 @@ class MyApp extends StatelessWidget{
 
 }
 
+class TutorialPage extends StatefulWidget{
+  const TutorialPage({
+    super.key
+  });
+
+  @override
+  State<TutorialPage> createState() => _TutorialPageState();
+}
+
+class _TutorialPageState extends State<TutorialPage>{
+  @override
+  void initState(){
+    super.initState();
+    _CheckFirstTime();
+  }
+
+  Future <void> _CheckFirstTime() async{
+    final prefs = await SharedPreferences.getInstance();
+    bool? hasSeenTutorial = prefs.getBool('SeenTutorial');
+
+    if (hasSeenTutorial == true){
+      Navigator.pushReplacementNamed(context, '/homepage');
+    } else {
+      Navigator.pushReplacementNamed(context, '/introduction_page');
+    } 
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: CircularProgressIndicator()),
+    );
+  }
+}
 
