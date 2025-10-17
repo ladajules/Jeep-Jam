@@ -19,6 +19,11 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  final guideInfo = GuideModel(
+    title: 'How to read Jeepney Codes',
+   description: 'BLALALALALALLLA'
+   );
+
   // List of pages for the bottom nav bar
   // final List<Widget> _pages = [
   //   TestingHomePage(),
@@ -137,8 +142,12 @@ class _HomePageState extends State<HomePage> {
                 
 
               ),
-            )
+            ),
 
+          GuideWidget(guide: 
+            guideInfo
+
+          ),
 
             ],
           ),
@@ -146,6 +155,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ), 
 
+      
         bottomNavigationBar: SalomonBottomBar(
           currentIndex: _selectedIndex,
           selectedItemColor: const Color(0xff6200ee),
@@ -180,3 +190,66 @@ final _navBarItems = [
     selectedColor: Colors.teal,
   ),
 ];
+
+
+class GuideWidget extends StatelessWidget{
+  final GuideModel guide;
+
+  const GuideWidget({
+    super.key,
+    required this.guide,
+    });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: [
+          Text(
+            guide.title,
+          ),
+
+          Text(
+            guide.description,
+          )
+        ],
+      ),
+    );
+  }
+
+}
+
+
+
+
+
+
+class WeatherModel{
+  final String condition;
+  final double temperature;
+
+  WeatherModel({
+    required this.condition,
+    required this.temperature
+  });
+}
+
+class PopularRouteModel{
+  final String destination;
+  final List<String> jeepneyCodes;
+
+  PopularRouteModel({
+    required this.destination,
+    required this.jeepneyCodes,
+  });
+}
+
+class GuideModel{
+  final String title;
+  final String description;
+
+  GuideModel({
+    required this.title,
+    required this.description,
+  });
+}
