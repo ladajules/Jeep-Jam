@@ -1,5 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:http/retry.dart';
 import 'package:lottie/lottie.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -42,9 +46,9 @@ class _HomePageState extends State<HomePage> {
 
     @override
     void initState(){
-      super.initState;
+      super.initState();
       _getLocationAndAddress();
-      _fetchWeather();
+      _fetchWeather();  
     }
 
   // Function for the bottom nav bar
@@ -142,7 +146,7 @@ class _HomePageState extends State<HomePage> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: const Color.fromARGB(50, 0, 0, 0),
                   spreadRadius: 2,
                   blurRadius: 10,
                   offset: Offset(0, -2),
@@ -191,7 +195,39 @@ class _HomePageState extends State<HomePage> {
 
                               GestureDetector(
                                 onTap: (){
-                                  //show detailzzzzz
+                                    showMaterialModalBottomSheet(
+                                      
+                                      expand: false,
+                                      context: context, 
+                                      backgroundColor: Colors.transparent,
+                                      builder: (context) => FractionallySizedBox(
+                                        heightFactor: 0.4,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(20),
+                                            boxShadow: [
+                                            BoxShadow(
+                                              color: const Color.fromARGB(50, 0, 0, 0),
+                                              spreadRadius: 2,
+                                              blurRadius: 10,
+                                              offset: Offset(0, -2),
+                                            ),
+                                            ]
+                                          ),
+                                          
+                                          child: WeatherScreen(
+                                            weather: _weather,
+                                            position: _currentPosition,
+                                            placemark: _currentAddress,
+                                          ),
+                                        ),
+                                      )
+
+                                      
+                                    );
+                                  
+                                  
                                 },
 
                                 child: Container(
@@ -205,17 +241,19 @@ class _HomePageState extends State<HomePage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Center(
-                                      child: Lottie.asset(getWeatherIcon(_weather?.mainCondition),
+                                      child: _weather != null ? Lottie.asset(getWeatherIcon(_weather?.mainCondition),
                                         width: 30,  
                                         height: 30,
                                         fit: BoxFit.contain, 
-                                      ),
+                                      )
+                                      : 
+                                      const Text('error'),
                                     ),
 
-                                    SizedBox(width: 8),
+                                    SizedBox(height: 4),
 
                                     Row(
-                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisSize: MainAxisSize.min, 
                                       children: [
                                         Text(
                                           '${_weather?.temperature.round() ?? '--'}℃',
@@ -402,36 +440,160 @@ final _navBarItems = [
 ];
 
 
+class WeatherScreen extends StatefulWidget{
+    final Weather? weather;
+  final Position? position;
+  final Placemark? placemark;
 
-class WeatherModel{
-  final String condition;
-  final double temperature;
+  const WeatherScreen({
+    Key? key,
+    required this.weather,
+    required this.position,
+    required this.placemark
+  }) : super(key: key);
 
-  WeatherModel({
-    required this.condition,
-    required this.temperature
-  });
+
+  @override
+  State<WeatherScreen> createState() => _WeatherScreenState();
+
 }
 
-class PopularRouteModel{
-  final String destination;
-  final List<String> jeepneyCodes;
+class _WeatherScreenState extends State<WeatherScreen>{
+  @override
+  Widget build(BuildContext context){
+    final hasError = widget.weather == null || widget.position == null;
 
-  PopularRouteModel({
-    required this.destination,
-    required this.jeepneyCodes,
-  });
+      String getWeatherIcon (String? mainCondition){
+    if (mainCondition == null){
+      return 'assets/weather_icons/sunny.json';
+    }
+
+    switch(mainCondition.toLowerCase()){
+       case 'clouds':
+      return 'assets/weather_icons/windy.json';
+
+      case 'rain':
+      return 'assets/weather_icons/rain.json';
+
+      case 'thunderstorm':
+      return 'assets/weather_icons/thunderstorm.json';
+
+      case 'clear':
+      return 'assets/weather_icons/sunny.json';
+
+      default:
+      return 'assets/weather_icons/windy.json';
+    }
+  }
+
+
+    return Padding(
+        padding: const EdgeInsets.all(20),
+      child: Center(
+        child: hasError //ternary for which build to show
+        ?
+        Column( //shows this if weather or location is error
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 7),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            Text(
+              'An error occured. Try again later', style: TextStyle(
+                fontSize: 16,
+                color: Colors.black 
+              ),
+            ),
+    
+            
+            SizedBox(height: 50),
+      
+            Lottie.asset('assets/LoadingFiles.json'),
+      
+            Text('Wait wait wait!! jeep jam will fix things!', style: 
+              TextStyle(
+                fontSize: 16,
+                color: Colors.black)
+                )
+          ],
+        )
+        
+        : //if it returns valid information it returns weather weather lang
+        Column(
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 7),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            Text('Weather in the area',
+            style: TextStyle(
+              fontSize: 20
+              
+            ),
+            ),
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Lottie.asset(getWeatherIcon(widget.weather?.mainCondition),
+                  width: 200,
+                  height: 200,
+                  fit: BoxFit.contain
+                  ),
+                  
+                  Text('${widget.weather?.temperature.round()}°', 
+                  style: TextStyle(
+                    fontSize: 50,
+                  ),
+                  )
+                ],
+              ),
+            ),
+
+            SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+        
+              Text('${widget.weather?.description}',
+              style: TextStyle(
+                fontSize: 16
+              ),
+              ),
+
+              SizedBox(width: 20),  //spacing
+
+              Text('Feels like: ${widget.weather?.feelsLike.round()}°',
+              style: TextStyle(
+                fontSize: 16
+              ),),
+
+              SizedBox(width: 20),  //spacing
+        
+              Text('Humidity: ${widget.weather?.humidity}',
+              style: TextStyle(
+                fontSize: 16
+              ),),
+            ],)
+        
+          ],
+        )
+
+      ),
+    );
+  }
+
 }
-
-class GuideModel{
-  final String title;
-  final String description;
-
-  GuideModel({
-    required this.title,
-    required this.description,
-  });
-}
-
-  //bottom_sheet_modal -> make error page and info page zzz
-  //wrap the weatherContainer with gestureDetector -> done 
