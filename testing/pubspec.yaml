@@ -17,6 +17,9 @@ dependencies:
   shared_preferences: ^2.5.3
   geolocator: ^14.0.2
   geocoding: ^4.0.0
+  http: ^1.5.0
+  modal_bottom_sheet: ^3.0.0
+  
 
 dev_dependencies:
   flutter_test:
@@ -29,3 +32,4 @@ flutter:
   assets:
     - assets/
     - assets/tutorial_icons/
+    - assets/weather_icons/

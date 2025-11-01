@@ -33,7 +33,7 @@ class LocationService {
     if (!hasPermission) return null;
 
     return await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      locationSettings: locationSettings
     );
   }
 
@@ -91,4 +91,27 @@ class LocationService {
 
   }
 
+  Future getCurrentCity () async{
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied){
+        permission = await Geolocator.requestPermission();
+    }
+
+    Position position = await Geolocator.getCurrentPosition(
+      locationSettings: locationSettings
+    );
+
+    List <Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+
+    String? city = placemarks[0].locality;
+
+    return city ?? "";
+
+  }
+
 }
+
+final LocationSettings locationSettings = LocationSettings(
+  accuracy: LocationAccuracy.high
+);
