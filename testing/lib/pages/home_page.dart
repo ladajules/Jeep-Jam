@@ -1,13 +1,13 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:http/retry.dart';
 import 'package:lottie/lottie.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:testing/services/weather_service.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' hide Marker;
+import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../services/location.dart';
 
 class HomePage extends StatefulWidget {
@@ -24,32 +24,54 @@ class _HomePageState extends State<HomePage> {
   Placemark? _currentAddress;
   String _status = "No location yet yo";
   final DraggableScrollableController _scrollController = DraggableScrollableController();
-  // weather weather lang
-  final _weatherService = WeatherService('8495ebbd64085ce1548343ab7d374f9b');
-  Weather ? _weather;
+  double _sheetPosition = 0.25;
 
-  _fetchWeather() async{
+  // Google Maps
+  GoogleMapController? _mapController;
+  Set<maps.Marker> _markers = {};
+
+  static const CameraPosition _initialPosition = CameraPosition(
+    target: LatLng(10.2926, 123.9022),
+    zoom: 14,
+  );
+
+  // weather weather lang
+  late WeatherService _weatherService;
+  Weather? _weather;
+
+    @override
+    void initState(){
+      super.initState();
+
+      final weatherApiKey = dotenv.env['OPENWEATHER_API_KEY'];
+      _weatherService = WeatherService(weatherApiKey!);
+
+      _getLocationAndAddress();
+      _fetchWeather();  
+
+      _scrollController.addListener(() {
+        if (_scrollController.isAttached) {
+          setState(() {
+            _sheetPosition = _scrollController.size;
+          });
+        }
+      });
+    }
+
+  Future<void> _fetchWeather() async {
     String cityName = await _locationService.getCurrentCity();
 
-    try{
+    try {
       final weather = await _weatherService.getWeather(cityName);
       setState(() {
         _weather = weather;
       });
     }
 
-    catch(e){
+    catch(e) {
       print("unable to fetch weather");
     }
   }
-
-
-    @override
-    void initState(){
-      super.initState();
-      _getLocationAndAddress();
-      _fetchWeather();  
-    }
 
   // Function for the bottom nav bar
   void _navigationBottomBar(int index) {
@@ -70,20 +92,42 @@ class _HomePageState extends State<HomePage> {
 
     final placemark = await _locationService.getAddressFromCoordinates(position);
 
-
-
     setState(() {
       _currentPosition = position;
       _currentAddress = placemark;
       _status = placemark != null ? "Location fetched successfully!" : "Failed to get address";
     });
 
+    if (_mapController != null) {
+      final LatLng userLocation = LatLng(position.latitude, position.longitude);
+
+      _mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target:userLocation,
+            zoom: 15,
+          ),
+        ),
+      );
+
+      setState(() {
+        _markers = {
+          maps.Marker(
+            markerId: MarkerId('user_location'),
+            position: userLocation,
+            infoWindow: InfoWindow(
+              title: 'Your Location',
+              snippet: placemark != null ? '${placemark.street}, ${placemark.locality}' : '',
+            ),
+          ),
+        };
+      });
+    }
   }
 
   // List of pages for the bottom nav bar
   // final List<Widget> _pages = [
   //   TestingHomePage(),
-  //   TestingMapPage(),
   //   TestingSavedroutesPage(),
   //   TestingSettingsPage(),
   // ];
@@ -111,25 +155,110 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _onMapCreated(GoogleMapController controller) {
+    _mapController = controller;
+
+    if (_currentPosition != null) {
+      final LatLng userLocation = LatLng(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude
+      );
+
+      _mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: userLocation,
+            zoom: 15,
+          ),
+        ),
+      );
+    }
+  }
+
+  // make the buttons follow along the draggable sheet (not functional yet)
+  double _calculateButtonPosition() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxSheetHeight = screenHeight * 0.5;
+    final currentSheetHeight = screenHeight * _sheetPosition;
+
+    if (_sheetPosition <= 0.5) {
+      return currentSheetHeight + 16;
+    } else {
+      return maxSheetHeight + 16;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
       return Scaffold(
         body: Stack(
           children: [
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: Color(0xFFB3E5FC),
-              child: Center(
-                child: Text(
-                  'Maps will be here (temporary)',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.black,
+            // Gogol maps
+            GoogleMap(
+              onMapCreated: _onMapCreated,
+              initialCameraPosition: _initialPosition,
+              markers: _markers,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+              mapType: MapType.normal,
+              zoomControlsEnabled: false,
+              liteModeEnabled: true, // once naa najuy gogol maps, ill try erasing this
+            ),
+
+            // za buttons
+            Positioned(
+              right: 16,
+              bottom: _calculateButtonPosition(),
+              child: Column(
+                children: [
+                  // explore button 
+                  FloatingActionButton(
+                    onPressed: () {
+                      print('Explore button pressed. Centering the center point to make it center so it would be at the center, middle of the map...');
+                      // some function that centers the thingyy, i saw it somewhere sa YT
+                    },
+                    backgroundColor: Colors.white,
+                    elevation: 4,
+                    child: Icon(
+                      Icons.explore,
+                      color: Colors.blue,
+                      size: 30,
+                    ),
                   ),
-                ),
+                  SizedBox(height: 15),
+
+                  // directions button
+                  FloatingActionButton(
+                    onPressed: () {
+                      print('Direction button pressed. Redirecting to directions page... chaaar');
+                      //Navigator.pushNamed(context, '/soon to open nga page');
+                    },
+                    backgroundColor: Colors.white,
+                    elevation: 4,
+                    child: Icon(
+                      Icons.directions,
+                      color: Colors.blue,
+                      size: 30,
+                    ),
+                  ),
+                ],
               ),
             ),
+
+            // Container(
+            //   width: double.infinity,
+            //   height: double.infinity,
+            //   color: Color(0xFFB3E5FC),
+            //   child: Center(
+            //     child: Text(
+            //       'Maps will be here (temporary)',
+            //       style: TextStyle(
+            //         fontSize: 18,
+            //         color: Colors.black,
+            //       ),
+            //     ),
+            //   ),
+            // ),
 
           DraggableScrollableSheet(
           initialChildSize: 0.25,
@@ -313,15 +442,6 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Text(
-                      //   'current loc (try, this is working btw i think)',
-                      //   style: TextStyle(
-                      //     fontSize: 20,
-                      //     fontWeight: FontWeight.bold,
-                      //     color: Colors.red,
-                      //   ),
-                      // ),
-                      SizedBox(height: 8),
                       Text(
                         _currentAddress != null 
                             ? '${_currentAddress!.street}, ${_currentAddress!.locality}' 
@@ -368,18 +488,21 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   },
-)
+),
 
 
   ],
 ), 
 
-        bottomNavigationBar: SalomonBottomBar(
-          currentIndex: _selectedIndex,
-          selectedItemColor: const Color(0xff6200ee),
-          unselectedItemColor: const Color(0xff757575),
-          onTap: _navigationBottomBar,
-          items: _navBarItems,
+        bottomNavigationBar: Container(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          child: SalomonBottomBar(
+              currentIndex: _selectedIndex,
+              selectedItemColor: const Color(0xff6200ee),
+              unselectedItemColor: const Color(0xff757575),
+              onTap: _navigationBottomBar,
+              items: _navBarItems,
+          ),
         ),
       );
   }
@@ -415,7 +538,6 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-
 final _navBarItems = [
   SalomonBottomBarItem(
     icon: const Icon(Icons.home),
@@ -423,25 +545,19 @@ final _navBarItems = [
     selectedColor: Colors.purple,
   ),
   SalomonBottomBarItem(
-    icon: const Icon(Icons.favorite_border),
-    title: const Text("Map"),
-    selectedColor: Colors.orange,
-  ),
-  SalomonBottomBarItem(
-    icon: const Icon(Icons.search),
-    title: const Text("Saved Routes"),
+    icon: const Icon(Icons.bookmark),
+    title: const Text("Saved"),
     selectedColor: Colors.blue,
   ),
   SalomonBottomBarItem(
-    icon: const Icon(Icons.person),
+    icon: const Icon(Icons.settings),
     title: const Text("Settings"),
     selectedColor: Colors.teal,
   ),
 ];
 
-
-class WeatherScreen extends StatefulWidget{
-    final Weather? weather;
+class WeatherScreen extends StatefulWidget {
+  final Weather? weather;
   final Position? position;
   final Placemark? placemark;
 
@@ -452,10 +568,8 @@ class WeatherScreen extends StatefulWidget{
     required this.placemark
   }) : super(key: key);
 
-
   @override
   State<WeatherScreen> createState() => _WeatherScreenState();
-
 }
 
 class _WeatherScreenState extends State<WeatherScreen>{
@@ -469,7 +583,7 @@ class _WeatherScreenState extends State<WeatherScreen>{
     }
 
     switch(mainCondition.toLowerCase()){
-       case 'clouds':
+      case 'clouds':
       return 'assets/weather_icons/windy.json';
 
       case 'rain':
@@ -488,7 +602,7 @@ class _WeatherScreenState extends State<WeatherScreen>{
 
 
     return Padding(
-        padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Center(
         child: hasError //ternary for which build to show
         ?
@@ -504,21 +618,21 @@ class _WeatherScreenState extends State<WeatherScreen>{
               ),
             ),
 
+            SizedBox(height: 20),
             Text(
-              'An error occured. Try again later', style: TextStyle(
-                fontSize: 16,
+              'An error occured. Try again later!', style: TextStyle(
+                fontSize: 24,
                 color: Colors.black 
               ),
             ),
     
-            
-            SizedBox(height: 50),
-      
+            SizedBox(height: 20),      
             Lottie.asset('assets/LoadingFiles.json'),
       
+            SizedBox(height: 20),  
             Text('Wait wait wait!! jeep jam will fix things!', style: 
               TextStyle(
-                fontSize: 16,
+                fontSize: 18,
                 color: Colors.black)
                 )
           ],
@@ -538,10 +652,11 @@ class _WeatherScreenState extends State<WeatherScreen>{
               ),
             ),
 
+            SizedBox(height: 20),
             Text('Weather in the area',
             style: TextStyle(
-              fontSize: 20
-              
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
             ),
             ),
             Center(
@@ -554,11 +669,11 @@ class _WeatherScreenState extends State<WeatherScreen>{
                   fit: BoxFit.contain
                   ),
                   
-                  Text('${widget.weather?.temperature.round()}°', 
+                  Text('  ${widget.weather?.temperature.round()}°C', 
                   style: TextStyle(
                     fontSize: 50,
                   ),
-                  )
+                  ),
                 ],
               ),
             ),
