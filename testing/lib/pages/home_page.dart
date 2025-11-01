@@ -8,6 +8,7 @@ import 'package:testing/services/weather_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' hide Marker;
 import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:logger/logger.dart';
 import '../services/location.dart';
 
 class HomePage extends StatefulWidget {
@@ -25,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   String _status = "No location yet yo";
   final DraggableScrollableController _scrollController = DraggableScrollableController();
   double _sheetPosition = 0.25;
+  final logger = Logger(); // e = error; i = info msg; w = warning msg; d = debug msg
 
   // Google Maps
   GoogleMapController? _mapController;
@@ -69,7 +71,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     catch(e) {
-      print("unable to fetch weather");
+      logger.e("unable to fetch weather");
     }
   }
 
@@ -214,7 +216,7 @@ class _HomePageState extends State<HomePage> {
                   // explore button 
                   FloatingActionButton(
                     onPressed: () {
-                      print('Explore button pressed. Centering the center point to make it center so it would be at the center, middle of the map...');
+                      logger.i('Explore button pressed. Centering the center point to make it center so it would be at the center, middle of the map...');
                       // some function that centers the thingyy, i saw it somewhere sa YT
                     },
                     backgroundColor: Colors.white,
@@ -230,7 +232,7 @@ class _HomePageState extends State<HomePage> {
                   // directions button
                   FloatingActionButton(
                     onPressed: () {
-                      print('Direction button pressed. Redirecting to directions page... chaaar');
+                      logger.i('Direction button pressed. Redirecting to directions page... chaaar');
                       //Navigator.pushNamed(context, '/soon to open nga page');
                     },
                     backgroundColor: Colors.white,
@@ -287,7 +289,7 @@ class _HomePageState extends State<HomePage> {
               slivers: [
                 // Sticky header with drag handle
                 SliverPersistentHeader(
-                  pinned: true,
+                pinned: true,
                 delegate: _StickyHeaderDelegate(
                   minHeight: 100,
                   maxHeight: 100,
@@ -403,7 +405,7 @@ class _HomePageState extends State<HomePage> {
 
                                         
                                       ],
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),
@@ -466,7 +468,7 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(height: 16),
                 // Scrollable items
                 ...List.generate(
-                  10,
+                  15,
                   (index) => Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
                     child: Container(
@@ -562,11 +564,11 @@ class WeatherScreen extends StatefulWidget {
   final Placemark? placemark;
 
   const WeatherScreen({
-    Key? key,
+    super.key,
     required this.weather,
     required this.position,
     required this.placemark
-  }) : super(key: key);
+  });
 
   @override
   State<WeatherScreen> createState() => _WeatherScreenState();
@@ -680,7 +682,7 @@ class _WeatherScreenState extends State<WeatherScreen>{
 
             SizedBox(height: 5),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
         
               Text('${widget.weather?.description}',

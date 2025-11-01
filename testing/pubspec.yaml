@@ -21,7 +21,7 @@ dependencies:
   modal_bottom_sheet: ^3.0.0
   google_maps_flutter: ^2.13.1
   flutter_dotenv: ^6.0.0
-  
+  logger: ^2.6.2  
 
 dev_dependencies:
   flutter_test:
@@ -35,3 +35,4 @@ flutter:
     - assets/
     - assets/tutorial_icons/
     - assets/weather_icons/
+    - .env

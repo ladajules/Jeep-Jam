@@ -1,7 +1,9 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:logger/logger.dart';
 
 class LocationService {
+  final logger = Logger();
 
   Future<bool> handlePermission() async {
     bool serviceEnabled;
@@ -58,7 +60,7 @@ class LocationService {
         }
 
     } catch (e) {
-      print('Error in getAddressFromCoordinates: $e');
+      logger.e('Error in getAddressFromCoordinates: $e');
     }
 
     return null;
@@ -72,7 +74,7 @@ class LocationService {
         return locations.first;
       }
     } catch (e) {
-      print('Error in getCoordinatesFromAddress: $e');
+      logger.e('Error in getCoordinatesFromAddress: $e');
     }
 
     return null;

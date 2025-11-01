@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,6 +7,15 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.reader(Charsets.UTF_8).use { reader ->
+        localProperties.load(reader)
+    }
+}
+
+val googleCloudApiKey: String? = localProperties.getProperty("GOOGLE_CLOUD_API_KEY")
 android {
     namespace = "com.mgt.jeepjam"
     compileSdk = flutter.compileSdkVersion
@@ -28,7 +39,8 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        manifestPlaceholders = [GOOGLE_MAPS_API_KEY: project.property("GOOGLE_MAPS_API_KEY")]
+
+        manifestPlaceholders["GOOGLE_CLOUD_API_KEY"] = googleCloudApiKey ?: ""
     }
 
     buildTypes {

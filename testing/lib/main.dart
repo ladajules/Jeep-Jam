@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await dotenv.load(fileName: ".env"); // load environtment variables
 
   runApp(MyApp());
@@ -26,7 +26,6 @@ class MyApp extends StatelessWidget{
       }
     );
   }
-
 }
 
 class TutorialPage extends StatefulWidget{
@@ -48,6 +47,8 @@ class _TutorialPageState extends State<TutorialPage>{
   Future <void> _checkFirstTime() async{
     final prefs = await SharedPreferences.getInstance();
     bool? hasSeenTutorial = prefs.getBool('SeenTutorial');
+
+    if (!mounted) return; // to check if the widget is still within the tree
 
     if (hasSeenTutorial == true){
       Navigator.pushReplacementNamed(context, '/homepage');
