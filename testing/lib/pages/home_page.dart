@@ -5,7 +5,7 @@ import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:testing/services/weather_service.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart' hide Marker;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
@@ -216,8 +216,16 @@ class _HomePageState extends State<HomePage> {
                   // explore button 
                   FloatingActionButton(
                     onPressed: () {
-                      logger.i('Explore button pressed. Centering the center point to make it center so it would be at the center, middle of the map...');
-                      // some function that centers the thingyy, i saw it somewhere sa YT
+                      logger.i('MyLocation button pressed. Centering the center point to make it center so it would be at the center, middle of the map...');
+                      // centers the marker, i saw it somewhere sa YT
+                      _mapController?.animateCamera(
+                        CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                            zoom: 15,
+                            target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+                          )
+                        ),
+                      );
                     },
                     backgroundColor: Colors.white,
                     elevation: 4,
@@ -233,7 +241,7 @@ class _HomePageState extends State<HomePage> {
                   FloatingActionButton(
                     onPressed: () {
                       logger.i('Direction button pressed. Redirecting to directions page... chaaar');
-                      //Navigator.pushNamed(context, '/soon to open nga page');
+                      Navigator.pushNamed(context, '/directionspage');
                     },
                     backgroundColor: Colors.white,
                     elevation: 4,
@@ -301,7 +309,7 @@ class _HomePageState extends State<HomePage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Learn more',
+                                'Jeep Jam',
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,

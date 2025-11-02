@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:testing/pages/directions_page.dart';
 import 'package:testing/pages/introduction_page.dart';
 import 'package:testing/pages/home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget{
       routes: {
         '/intropage': (context) => const OnboardingPage1(),
         '/homepage': (context) => const HomePage(),
+        '/directionspage': (context) => const DirectionsPage(),
       }
     );
   }
