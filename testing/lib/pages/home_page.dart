@@ -201,13 +201,13 @@ class _HomePageState extends State<HomePage> {
               initialCameraPosition: _initialPosition,
               markers: _markers,
               myLocationEnabled: true,
-              myLocationButtonEnabled: true,
+              myLocationButtonEnabled: false,
               mapType: MapType.normal,
               zoomControlsEnabled: false,
-              liteModeEnabled: true, // once naa najuy gogol maps, ill try erasing this
+              //liteModeEnabled: true, // once naa najuy gogol maps, ill try erasing this
             ),
 
-            // za buttons
+            // da buttons
             Positioned(
               right: 16,
               bottom: _calculateButtonPosition(),
@@ -222,7 +222,7 @@ class _HomePageState extends State<HomePage> {
                     backgroundColor: Colors.white,
                     elevation: 4,
                     child: Icon(
-                      Icons.explore,
+                      Icons.my_location,
                       color: Colors.blue,
                       size: 30,
                     ),
@@ -246,21 +246,6 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-
-            // Container(
-            //   width: double.infinity,
-            //   height: double.infinity,
-            //   color: Color(0xFFB3E5FC),
-            //   child: Center(
-            //     child: Text(
-            //       'Maps will be here (temporary)',
-            //       style: TextStyle(
-            //         fontSize: 18,
-            //         color: Colors.black,
-            //       ),
-            //     ),
-            //   ),
-            // ),
 
           DraggableScrollableSheet(
           initialChildSize: 0.25,
@@ -355,7 +340,6 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       )
 
-                                      
                                     );
                                   
                                   
