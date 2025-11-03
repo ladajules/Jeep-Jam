@@ -4,12 +4,15 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:testing/pages/users_savedRoutes.dart';
+import 'package:testing/pages/users_saved_routes.dart';
 import 'package:testing/services/weather_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
+import 'package:testing/utils/weather_utils.dart';
+import 'package:testing/widgets/sticky_header_delegate.dart';
+import 'package:testing/widgets/weather_screen.dart';
 import '../services/location.dart';
 
 class HomePage extends StatefulWidget {
@@ -140,31 +143,8 @@ class _HomePageState extends State<HomePage> {
   //   // TestingSettingsPage(),
   // ];
 
-  String getWeatherIcon (String? mainCondition){
-    if (mainCondition == null){
-      return 'assets/weather_icons/sunny.json';
-    }
-
-    switch(mainCondition.toLowerCase()){
-      case 'clouds':
-      return 'assets/weather_icons/cloudy.json';
-
-      case 'rain':
-      return 'assets/weather_icons/rain.json';
-
-      case 'thunderstorm':
-      return 'assets/weather_icons/thunderstorm.json';
-
-      case 'clear':
-      return 'assets/weather_icons/sunny.json';
-
-      case 'wind':
-      return 'assets/weather_icons/windy.json';
-
-      default:
-      return 'assets/weather_icons/cloudy.json';
-    }
-  }
+   
+   
 
 
   void _onMapCreated(GoogleMapController controller) {
@@ -293,7 +273,7 @@ class _HomePageState extends State<HomePage> {
                 // Sticky header with drag handle
                 SliverPersistentHeader(
                 pinned: true,
-                delegate: _StickyHeaderDelegate(
+                delegate: StickyHeaderDelegate(
                   minHeight: 100,
                   maxHeight: 100,
                   child: Container(
@@ -551,35 +531,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final double minHeight;
-  final double maxHeight;
-  final Widget child;
-
-  _StickyHeaderDelegate({
-    required this.minHeight,
-    required this.maxHeight,
-    required this.child,
-  });
-
-  @override
-  double get minExtent => minHeight;
-
-  @override
-  double get maxExtent => maxHeight;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox.expand(child: child);
-  }
-
-  @override
-  bool shouldRebuild(_StickyHeaderDelegate oldDelegate) {
-    return maxHeight != oldDelegate.maxHeight ||
-        minHeight != oldDelegate.minHeight ||
-        child != oldDelegate.child;
-  }
-}
 
 final _navBarItems = [
   SalomonBottomBarItem(
@@ -599,166 +550,3 @@ final _navBarItems = [
   ),
 ];
 
-class WeatherScreen extends StatefulWidget {
-  final Weather? weather;
-  final Position? position;
-  final Placemark? placemark;
-
-  const WeatherScreen({
-    super.key,
-    required this.weather,
-    required this.position,
-    required this.placemark
-  });
-
-  @override
-  State<WeatherScreen> createState() => _WeatherScreenState();
-}
-
-class _WeatherScreenState extends State<WeatherScreen>{
-  @override
-  Widget build(BuildContext context){
-    final hasError = widget.weather == null || widget.position == null;
-
-  String getWeatherIcon (String? mainCondition){
-    if (mainCondition == null){
-      return 'assets/weather_icons/sunny.json';
-    }
-
-    switch(mainCondition.toLowerCase()){
-      case 'clouds':
-      return 'assets/weather_icons/cloudy.json';
-
-      case 'rain':
-      return 'assets/weather_icons/rain.json';
-
-      case 'thunderstorm':
-      return 'assets/weather_icons/thunderstorm.json';
-
-      case 'clear':
-      return 'assets/weather_icons/sunny.json';
-
-      case 'wind':
-      return 'assets/weather_icons/windy.json';
-
-      default:
-      return 'assets/weather_icons/cloudy.json';
-    }
-  }
-      
-
-
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Center(
-        child: hasError //ternary for which build to show
-        ?
-        Column( //shows this if weather or location is error
-          children: [
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 7),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            SizedBox(height: 20),
-            Text(
-              'An error occured. Try again later!', style: TextStyle(
-                fontSize: 24,
-                color: Colors.black 
-              ),
-            ),
-    
-            SizedBox(height: 20),      
-            Lottie.asset('assets/LoadingFiles.json'),
-      
-            SizedBox(height: 20),  
-            Text('Wait wait wait!! jeep jam will fix things!', style: 
-              TextStyle(
-                fontSize: 18,
-                color: Colors.black)
-                )
-          ],
-        )
-        
-        : //if it returns valid information it returns weather weather lang
-        Column(
-          // crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 7),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            SizedBox(height: 20),
-            Text('Weather in the area',
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            ),
-            ),
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Lottie.asset(getWeatherIcon(widget.weather?.mainCondition),
-                  width: 160,  
-                  height: 160,
-                  fit: BoxFit.contain,
-                  ),
-                
-                 
-                  
-                  Text('  ${widget.weather?.temperature.round()}°C', 
-                  style: TextStyle(
-                    fontSize: 50,
-                  ),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-        
-              Text('${widget.weather?.description}',
-              style: TextStyle(
-                fontSize: 16
-              ),
-              ),
-
-              SizedBox(width: 20),  //spacing
-
-              Text('Feels like: ${widget.weather?.feelsLike.round()}°',
-              style: TextStyle(
-                fontSize: 16
-              ),),
-
-              SizedBox(width: 20),  //spacing
-        
-              Text('Humidity: ${widget.weather?.humidity}',
-              style: TextStyle(
-                fontSize: 16
-              ),),
-            ],),
-            SizedBox(height: 4,),
-        
-          ],
-        )
-
-      ),
-    );
-  }
-
-}

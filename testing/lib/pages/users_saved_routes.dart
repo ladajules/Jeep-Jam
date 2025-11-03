@@ -2,6 +2,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:testing/widgets/sticky_header_delegate.dart';
 // import 'package:testing/main.dart';
 
 class SavedRoutes extends StatefulWidget{
@@ -17,13 +18,13 @@ class _SavedRoutesState extends State<SavedRoutes>{
 int index = 0;
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    // ignore: avoid_unnecessary_containers
     return Container(
       child:  CustomScrollView(
           slivers: [
             SliverPersistentHeader(
             pinned: true,
-            delegate: _StickyHeaderDelegate(
+            delegate: StickyHeaderDelegate(
               minHeight: 60,
               maxHeight: 60,
               child: Container(
@@ -144,32 +145,3 @@ int index = 0;
 
 }
 
-class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final double minHeight;
-  final double maxHeight;
-  final Widget child;
-
-  _StickyHeaderDelegate({
-    required this.minHeight,
-    required this.maxHeight,
-    required this.child,
-  });
-
-  @override
-  double get minExtent => minHeight;
-
-  @override
-  double get maxExtent => maxHeight;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox.expand(child: child);
-  }
-
-  @override
-  bool shouldRebuild(_StickyHeaderDelegate oldDelegate) {
-    return maxHeight != oldDelegate.maxHeight ||
-        minHeight != oldDelegate.minHeight ||
-        child != oldDelegate.child;
-  }
-}
