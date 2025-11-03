@@ -4,6 +4,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:testing/pages/users_savedRoutes.dart';
 import 'package:testing/services/weather_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
@@ -134,9 +135,9 @@ class _HomePageState extends State<HomePage> {
 
   // List of pages for the bottom nav bar
   // final List<Widget> _pages = [
-  //   TestingHomePage(),
-  //   TestingSavedroutesPage(),
-  //   TestingSettingsPage(),
+  //   HomePage(),
+  //   SavedRoutes(),
+  //   // TestingSettingsPage(),
   // ];
 
   String getWeatherIcon (String? mainCondition){
@@ -317,7 +318,8 @@ class _HomePageState extends State<HomePage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
+                  
+                                Text(
                                 'Jeep Jam',
                                 style: TextStyle(
                                   fontSize: 24,
@@ -328,6 +330,7 @@ class _HomePageState extends State<HomePage> {
 
                               GestureDetector(
                                 onTap: (){
+                                  logger.i("More info on weather pressed");
                                     showMaterialModalBottomSheet(
                                       
                                       expand: false,
@@ -429,12 +432,47 @@ class _HomePageState extends State<HomePage> {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 Center(
+              //practice rani para saved routes idk what button to put it kase HAHA
+
+                   child: GestureDetector(
+                    onTap: (){
+                        logger.i("Saved Routes pressed");
+
+                        showMaterialModalBottomSheet(
+                        expand: false,
+                        context: context, 
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => FractionallySizedBox(
+                          heightFactor: 0.7,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                BoxShadow(
+                                  color: const Color.fromARGB(50, 0, 0, 0),
+                                  spreadRadius: 2,
+                                  blurRadius: 10,
+                                  offset: Offset(0, -2),
+                                ),
+                                ]
+                              ),
+                              child: SavedRoutes(
+                                route: "im a saved route",
+                              ),
+                          ),
+                        ),
+                      );
+                    },
+                    
+
                   child: Text(
-                    'stuff will go here',
+                    'Practice Saved Routes',
                     style: TextStyle(
                       fontSize: 21,
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
                   ),
                 ),
                 SizedBox(height: 13),
