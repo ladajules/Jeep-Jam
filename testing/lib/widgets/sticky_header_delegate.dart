@@ -1,7 +1,5 @@
-
 import 'package:flutter/material.dart';
 
-// ignore: unused_element
 class StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   final double minHeight;
   final double maxHeight;

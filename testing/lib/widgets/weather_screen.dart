@@ -1,11 +1,9 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:lottie/lottie.dart';
-import 'package:testing/services/weather_service.dart';
-import 'package:testing/utils/weather_utils.dart';
+import '../services/weather_service.dart';
+import '../utils/weather_utils.dart';
 
 class WeatherScreen extends StatefulWidget {
   final Weather? weather;
@@ -28,7 +26,6 @@ class _WeatherScreenState extends State<WeatherScreen>{
   Widget build(BuildContext context){
     final hasError = widget.weather == null || widget.position == null;
 
-  
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Center(
@@ -91,14 +88,12 @@ class _WeatherScreenState extends State<WeatherScreen>{
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Lottie.asset(getWeatherIcon(widget.weather?.mainCondition),
+                  Lottie.asset(WeatherUtils.getWeatherIcon(widget.weather?.mainCondition),
                   width: 160,  
                   height: 160,
                   fit: BoxFit.contain,
                   ),
                 
-                 
-                  
                   Text('  ${widget.weather?.temperature.round()}°C', 
                   style: TextStyle(
                     fontSize: 50,

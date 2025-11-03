@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingPage1 extends StatelessWidget {
   const OnboardingPage1({super.key});
+
+  Future<void> _markTutorialSeen(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('SeenTutorial', true);
+    if (context.mounted) Navigator.pushReplacementNamed(context, '/homepage');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,12 +42,8 @@ class OnboardingPage1 extends StatelessWidget {
             bgColor: const Color.fromARGB(255, 240, 93, 82),
           ),
         ],
-        onSkip: (){
-          Navigator.pushReplacementNamed(context, '/homepage');
-        },
-        onFinish: (){
-          Navigator.pushReplacementNamed(context, '/homepage');
-        },
+        onSkip: () => _markTutorialSeen(context),
+        onFinish: () => _markTutorialSeen(context),
       ),
     );
   }

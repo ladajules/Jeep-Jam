@@ -23,6 +23,8 @@ class _DirectionsPageState extends State<DirectionsPage> {
   // ignore: unused_field
   Placemark? _currentAddress;
   bool _hasLocationPermission = false;
+  // ignore: unused_field
+  bool _isLoadingLocation = false;
 
   @override
   void initState() {
@@ -31,6 +33,7 @@ class _DirectionsPageState extends State<DirectionsPage> {
   }
 
   Future<void> _getLocationAndAddress() async {
+    setState(() => _isLoadingLocation = true);
     final position = await _locationService.getCurrentLocation();
 
     if (position != null) {
@@ -40,6 +43,7 @@ class _DirectionsPageState extends State<DirectionsPage> {
         _currentPosition = position;
         _currentAddress = placemark;
         _hasLocationPermission = true;
+        _isLoadingLocation = false;
 
         if (placemark != null) {
           _originController.text = '${placemark.street}, ${placemark.locality}';
@@ -188,8 +192,6 @@ class _DirectionsPageState extends State<DirectionsPage> {
                   ],
                 ),
               ),
-
-
 
             ],
           ),

@@ -3,7 +3,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 
-
 class Weather{
   final double temperature;
   final String mainCondition;
@@ -32,18 +31,15 @@ class Weather{
 
 
 class WeatherService {
-
   static const baseURL = 'https://weather.googleapis.com/v1/currentConditions:lookup';
 
- String? weatherApiKey = dotenv.env['GOOGLE_CLOUD_API_KEY'];
+  String? weatherApiKey = dotenv.env['GOOGLE_CLOUD_API_KEY'];
     final logger = Logger();
-
 
   WeatherService(this.weatherApiKey);
 
   Future<Weather?> getWeather(double? longitude, double? latitude) async{
-  
-
+    
     final response = await http.get(Uri.parse('$baseURL?key=$weatherApiKey&location.latitude=$latitude&location.longitude=$longitude'));
     if (response.statusCode == 200){
       return Weather.fromJson(jsonDecode(response.body));
@@ -53,5 +49,4 @@ class WeatherService {
     }
   }
 
-  
 }

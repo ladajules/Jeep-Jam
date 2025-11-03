@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+//import 'package:testing/pages/users_saved_routes.dart';
 import 'package:testing/pages/directions_page.dart';
 import 'package:testing/pages/introduction_page.dart';
 import 'package:testing/pages/home_page.dart';
@@ -19,12 +20,13 @@ class MyApp extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: OnboardingPage1(),
+      home: const TutorialPage(),
       debugShowCheckedModeBanner: false,
       routes: {
         '/intropage': (context) => const OnboardingPage1(),
         '/homepage': (context) => const HomePage(),
         '/directionspage': (context) => const DirectionsPage(),
+        //'/savedroutespage': (context) => const SavedRoutes(),
       }
     );
   }
@@ -55,7 +57,7 @@ class _TutorialPageState extends State<TutorialPage>{
     if (hasSeenTutorial == true){
       Navigator.pushReplacementNamed(context, '/homepage');
     } else {
-      Navigator.pushReplacementNamed(context, '/introduction_page');
+      Navigator.pushReplacementNamed(context, '/intropage');
     } 
   }
 

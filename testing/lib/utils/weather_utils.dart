@@ -1,6 +1,5 @@
-
-
-String getWeatherIcon (String? mainCondition){
+class WeatherUtils {
+  static String getWeatherIcon (String? mainCondition){
     if (mainCondition == null){
       return 'assets/weather_icons/sunny.json';
     }
@@ -28,3 +27,4 @@ String getWeatherIcon (String? mainCondition){
       return 'assets/weather_icons/cloudy.json';
     }
   }
+}
