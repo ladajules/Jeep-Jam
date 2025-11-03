@@ -45,11 +45,11 @@ class _HomePageState extends State<HomePage> {
     void initState(){
       super.initState();
 
-      final weatherApiKey = dotenv.env['OPENWEATHER_API_KEY'];
+      final weatherApiKey = dotenv.env['GOOGLE_CLOUD_API_KEY'];
       _weatherService = WeatherService(weatherApiKey!);
 
       _getLocationAndAddress();
-      _fetchWeather();  
+      // _fetchWeather();  
 
       _scrollController.addListener(() {
         if (_scrollController.isAttached) {
@@ -60,20 +60,6 @@ class _HomePageState extends State<HomePage> {
       });
     }
 
-  Future<void> _fetchWeather() async {
-    String cityName = await _locationService.getCurrentCity();
-
-    try {
-      final weather = await _weatherService.getWeather(cityName);
-      setState(() {
-        _weather = weather;
-      });
-    }
-
-    catch(e) {
-      logger.e("unable to fetch weather");
-    }
-  }
 
   // Function for the bottom nav bar
   void _navigationBottomBar(int index) {
@@ -99,6 +85,8 @@ class _HomePageState extends State<HomePage> {
       _currentAddress = placemark;
       _status = placemark != null ? "Location fetched successfully!" : "Failed to get address";
     });
+
+    await _fetchWeather();
 
     if (_mapController != null) {
       final LatLng userLocation = LatLng(position.latitude, position.longitude);
@@ -127,6 +115,23 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _fetchWeather() async {
+    // String cityName = await _locationService.getCurrentCity();
+
+    try {
+      final weather = await _weatherService.getWeather(_currentPosition?.longitude, _currentPosition?.latitude);
+      setState(() {
+        _weather = weather;
+      });
+    }
+
+    catch(e) {
+      logger.e("unable to fetch weather");
+    }
+  }
+
+
+
   // List of pages for the bottom nav bar
   // final List<Widget> _pages = [
   //   TestingHomePage(),
@@ -140,8 +145,8 @@ class _HomePageState extends State<HomePage> {
     }
 
     switch(mainCondition.toLowerCase()){
-       case 'clouds':
-      return 'assets/weather_icons/windy.json';
+      case 'clouds':
+      return 'assets/weather_icons/cloudy.json';
 
       case 'rain':
       return 'assets/weather_icons/rain.json';
@@ -152,10 +157,14 @@ class _HomePageState extends State<HomePage> {
       case 'clear':
       return 'assets/weather_icons/sunny.json';
 
-      default:
+      case 'wind':
       return 'assets/weather_icons/windy.json';
+
+      default:
+      return 'assets/weather_icons/cloudy.json';
     }
   }
+
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
@@ -204,7 +213,7 @@ class _HomePageState extends State<HomePage> {
               myLocationButtonEnabled: false,
               mapType: MapType.normal,
               zoomControlsEnabled: false,
-              //liteModeEnabled: true, // once naa najuy gogol maps, ill try erasing this
+              // liteModeEnabled: true, // once naa najuy gogol maps, ill try erasing this
             ),
 
             // da buttons
@@ -364,39 +373,41 @@ class _HomePageState extends State<HomePage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Center(
-                                      child: _weather != null ? Lottie.asset(getWeatherIcon(_weather?.mainCondition),
-                                        width: 30,  
-                                        height: 30,
-                                        fit: BoxFit.contain, 
-                                      )
-                                      : 
-                                      const Text('error'),
-                                    ),
-
-                                    SizedBox(height: 4),
-
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min, 
-                                      children: [
-                                        Text(
-                                          '${_weather?.temperature.round() ?? '--'}℃',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black,
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              _weather != null ? Lottie.asset(getWeatherIcon(_weather?.mainCondition),
+                                                width: 30,  
+                                                height: 30,
+                                              fit: BoxFit.contain,
+                                              )
+                                              : 
+                                              const Text('error'),
+                                          
+                                              Text(
+                                                '${_weather?.temperature.round() ?? '--'}℃',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          _weather?.mainCondition ?? "Loading....", style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black,
-                                          )
-                                        ),
-
-                                        
-                                      ],
+                                          SizedBox(width: 5),
+                                          
+                                                            
+                                                          
+                                          // Text(
+                                          //   _weather?.mainCondition ?? "Loading....", style: TextStyle(
+                                          //     fontSize: 14,
+                                          //     fontWeight: FontWeight.w500,
+                                          //     color: Colors.black,
+                                          //   )
+                                          // ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -571,14 +582,14 @@ class _WeatherScreenState extends State<WeatherScreen>{
   Widget build(BuildContext context){
     final hasError = widget.weather == null || widget.position == null;
 
-      String getWeatherIcon (String? mainCondition){
+  String getWeatherIcon (String? mainCondition){
     if (mainCondition == null){
       return 'assets/weather_icons/sunny.json';
     }
 
     switch(mainCondition.toLowerCase()){
       case 'clouds':
-      return 'assets/weather_icons/windy.json';
+      return 'assets/weather_icons/cloudy.json';
 
       case 'rain':
       return 'assets/weather_icons/rain.json';
@@ -589,10 +600,14 @@ class _WeatherScreenState extends State<WeatherScreen>{
       case 'clear':
       return 'assets/weather_icons/sunny.json';
 
-      default:
+      case 'wind':
       return 'assets/weather_icons/windy.json';
+
+      default:
+      return 'assets/weather_icons/cloudy.json';
     }
   }
+      
 
 
     return Padding(
@@ -658,10 +673,12 @@ class _WeatherScreenState extends State<WeatherScreen>{
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Lottie.asset(getWeatherIcon(widget.weather?.mainCondition),
-                  width: 200,
-                  height: 200,
-                  fit: BoxFit.contain
+                  width: 160,  
+                  height: 160,
+                  fit: BoxFit.contain,
                   ),
+                
+                 
                   
                   Text('  ${widget.weather?.temperature.round()}°C', 
                   style: TextStyle(
@@ -696,7 +713,8 @@ class _WeatherScreenState extends State<WeatherScreen>{
               style: TextStyle(
                 fontSize: 16
               ),),
-            ],)
+            ],),
+            SizedBox(height: 4,),
         
           ],
         )

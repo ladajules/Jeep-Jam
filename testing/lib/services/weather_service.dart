@@ -1,11 +1,13 @@
 import 'dart:convert';
 // import 'package:geocoding/geocoding.dart';
 // import 'package:geolocator/geolocator.dart';
+// import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 // import 'location.dart';
 
 class Weather{
-  final String cityName;
   final double temperature;
   final String mainCondition;
   final double feelsLike;
@@ -13,22 +15,20 @@ class Weather{
   final int humidity;
 
   Weather({
-    required this.cityName,
     required this.temperature, 
     required this.mainCondition, 
     required this.feelsLike, 
     required this.description, 
-    required this.humidity
+    required this.humidity,
   });
 
   factory Weather.fromJson(Map<String, dynamic> json){
     return Weather(
-      cityName: json['name'],
-      temperature: json['main']['temp'].toDouble(),
-      mainCondition: json['weather'][0]['main'],
-      feelsLike: json['main']['feels_like'].toDouble(),
-      description: json['weather'][0]['description'],
-      humidity: json['main']['humidity']
+      temperature: json['temperature']['degrees'].toDouble(),
+      mainCondition: json['weatherCondition']['type'],
+      feelsLike: json['feelsLikeTemperature']['degrees'].toDouble(),
+      description: json['weatherCondition']['description']['text'],
+      humidity: json['relativeHumidity'],
     );
   }
 }
@@ -36,17 +36,23 @@ class Weather{
 
 class WeatherService {
 
-  static const baseURL = 'https://api.openweathermap.org/data/2.5/weather';
+  static const baseURL = 'https://weather.googleapis.com/v1/currentConditions:lookup';
 
-  final String apiKey;
+ String? weatherApiKey = dotenv.env['GOOGLE_CLOUD_API_KEY'];
+    final logger = Logger();
 
-  WeatherService(this.apiKey);
 
-  Future getWeather(String cityName) async{
-    final response = await http.get(Uri.parse('$baseURL?q=$cityName&appid=$apiKey&units=metric'));
+  WeatherService(this.weatherApiKey);
 
+  Future<Weather?> getWeather(double? longitude, double? latitude) async{
+  
+
+    final response = await http.get(Uri.parse('$baseURL?key=$weatherApiKey&location.latitude=$latitude&location.longitude=$longitude'));
     if (response.statusCode == 200){
       return Weather.fromJson(jsonDecode(response.body));
+    } else {
+      logger.e('weather service broken mygoodness');
+      return null;
     }
   }
 
