@@ -14,7 +14,7 @@ class JeepJamBottomNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
+      padding: EdgeInsets.symmetric(horizontal: 12),
       child: SalomonBottomBar(
         currentIndex: selectedIndex,
         selectedItemColor: const Color(0xff6200ee),
@@ -25,6 +25,11 @@ class JeepJamBottomNavbar extends StatelessWidget {
             icon: const Icon(Icons.home),
             title: const Text("Home"),
             selectedColor: Colors.purple,
+          ),
+          SalomonBottomBarItem(
+            icon: const Icon(Icons.assignment_rounded),
+            title: const Text("Activity"),
+            selectedColor: Colors.blue,
           ),
           SalomonBottomBarItem(
             icon: const Icon(Icons.bookmark),

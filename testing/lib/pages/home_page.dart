@@ -127,6 +127,7 @@ class _HomePageState extends State<HomePage> {
   List<Widget> _buildPages() {
     return [
       _buildMainContent(),
+      // activity page
       SavedRoutesPage(),
       //SettingsPage(),
     ];
@@ -143,11 +144,15 @@ class _HomePageState extends State<HomePage> {
       break;
 
       case 1:
-      logger.i('Saved routes tapped. Redirecting to saved routes page...');
+      logger.i('Activity page tapped. Redirecting to saved routes page...');
       break;
 
       case 2:
-      logger.i('Settings tapped. Redirecting to settings page...');
+      logger.i('Saved routes page tapped. Redirecting to saved routes page...');
+      break;
+
+      case 3:
+      logger.i('Settings page tapped. Redirecting to settings page...');
       break;
     }
   }
@@ -215,9 +220,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-      return Scaffold(
-        body: _buildPages()[_selectedIndex],
-      );
+    return Scaffold(
+      body: _buildPages()[_selectedIndex],
+    );
   }
 
   Widget _buildMainContent() {
