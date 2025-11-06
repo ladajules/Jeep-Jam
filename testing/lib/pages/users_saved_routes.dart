@@ -1,11 +1,14 @@
 //this is a modal for the users_savedRoutes
+
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:testing/widgets/sticky_header_delegate.dart';
 
 class SavedRoutesPage extends StatefulWidget{
   final String? route;
+  final VoidCallback? onBack;
 
-  const SavedRoutesPage({super.key, this.route});
+  const SavedRoutesPage({super.key, this.route, this.onBack});
 
   @override
   State<SavedRoutesPage> createState() => _SavedRoutesState();
@@ -13,7 +16,7 @@ class SavedRoutesPage extends StatefulWidget{
 
 class _SavedRoutesState extends State<SavedRoutesPage>{
   int index = 0;
-
+  final logger = Logger();
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -32,10 +35,6 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                   margin: EdgeInsets.only(bottom: 4),  // Reduced margin
                   width: 40,
                   height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -49,7 +48,13 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Icon(Icons.route),
+                      GestureDetector(
+                        onTap: (){
+                            logger.i('Closed button tapped on the Saved Routes Page. Redirecting to home...');
+                              widget.onBack?.call();
+                        },
+                        child: Icon(Icons.close),
+                      ),
                     ],
                   ),
                 ),
