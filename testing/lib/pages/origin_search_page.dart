@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 import '../services/places_service.dart';
 import '../services/location.dart';
+import '../pages/choose_on_map_page.dart';
 
 class OriginSearchPage extends StatefulWidget {
   final double? userLatitude;
@@ -221,22 +222,6 @@ class _OriginSearchPageState extends State<OriginSearchPage> {
     }
   }
 
-  void _chooseOnMap() { // not done, should show map zzzzzzzz
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'rest sako, i do dis later',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.normal,
-            fontSize: 14,
-          ),
-        ),
-        backgroundColor: Colors.black,
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _searchController.dispose();
@@ -316,14 +301,24 @@ class _OriginSearchPageState extends State<OriginSearchPage> {
           ),
 
           GestureDetector(
-            onTap: _chooseOnMap,
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChooseOnMapPage(mode: "origin")),
+              );
+
+              if (result != null && mounted) {
+                // ignore: use_build_context_synchronously
+                Navigator.pop(context, result);
+              }
+            },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Row(
                   children: [
                     Icon(
                       Icons.location_on_outlined,
-                      color: Colors.grey[700],
+                      color: const Color.fromARGB(255, 19, 18, 18),
                       size: 24,
                     ),
                     const SizedBox(width: 16),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 import '../services/places_service.dart';
+import '../pages/choose_on_map_page.dart';
 
 class DestinationSearchPage extends StatefulWidget {
   final double? userLatitude;
@@ -119,22 +120,6 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
     }
   }
 
-  void _chooseOnMap() { // not done, should show map zzzzzzzz
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'rest sako, i do dis later',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.normal,
-            fontSize: 14,
-          ),
-        ),
-        backgroundColor: Colors.black,
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _searchController.dispose();
@@ -184,8 +169,18 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
       body: Column(
         children: [
 
-          InkWell(
-            onTap: _chooseOnMap,
+          GestureDetector(
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChooseOnMapPage(mode: "destination")),
+              );
+              
+              if (result != null && mounted) {
+                // ignore: use_build_context_synchronously
+                Navigator.pop(context, result);
+              }
+            },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: Row(
