@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:testing/widgets/sticky_header_delegate.dart';
+import '../controllers/navigation_manager.dart';
+import '../widgets/bottom_nav_bar.dart';
 
 class SavedRoutesPage extends StatefulWidget{
   final String? route;
@@ -15,123 +17,137 @@ class SavedRoutesPage extends StatefulWidget{
 }
 
 class _SavedRoutesState extends State<SavedRoutesPage>{
-  int index = 0;
+  int currentIndex = 2;
   final logger = Logger();
+  final NavigationManager nav = NavigationManager();
+
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverPersistentHeader(
-        pinned: true,
-        delegate: StickyHeaderDelegate(
-          minHeight: 60,
-          maxHeight: 60,
-          child: Container(
-            color: Colors.white,  // Add background
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(bottom: 4),  // Reduced margin
-                  width: 40,
-                  height: 4,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Scaffold(
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: StickyHeaderDelegate(
+                minHeight: 60,
+                maxHeight: 60,
+                child: Container(
+                  color: Colors.white,  // Add background
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'You', 
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Container(
+                        margin: EdgeInsets.only(bottom: 4),  // Reduced margin
+                        width: 40,
+                        height: 4,
                       ),
-                      GestureDetector(
-                        onTap: (){
-                            logger.i('Closed button tapped on the Saved Routes Page. Redirecting to home...');
-                              widget.onBack?.call();
-                        },
-                        child: Icon(Icons.close),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'You', 
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() => currentIndex = 0);
+                                nav.navigate(context, 0); 
+                              },
+                              child: Icon(Icons.close),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
+              )
             ),
-          ),
-        )
-      ),
-  
-        SliverPadding(
-          padding: EdgeInsets.all(0.8),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(70, 95, 95, 95),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
+          
+            SliverPadding(
+              padding: EdgeInsets.all(0.8),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  Center(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(70, 95, 95, 95),
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add),
+                          
+                              SizedBox(width: 10,),
+                              //make this tappable add GestureDetector
+                              Text(
+                                'Add Route', style: 
+                                TextStyle(
+                                  
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+          
+                  SizedBox(height: 14),
+          
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Text('Your Saved Routes',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold
+                          ),
+                        ),
+                  ),
+          
+                  SizedBox(height: 14),
                       
-                          SizedBox(width: 10,),
-                          //make this tappable add GestureDetector
-                          Text(
-                            'Add Route', style: 
-                            TextStyle(
-                              
-                            ),
-                          )
-                        ],
+                  ...List.generate(
+                    20, 
+                    (index) => Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 15),
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(148, 158, 158, 158),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        
+                        child: Center(
+                          child: Text('${widget.route} #${index + 1}'),
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                  )
+                ]),
               ),
-  
-              SizedBox(height: 14),
-  
-              Padding(
-                padding: EdgeInsets.all(8),
-                child: Text('Your Saved Routes',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold
-                      ),
-                    ),
-              ),
-  
-              SizedBox(height: 14),
-                  
-              ...List.generate(
-                20, 
-                (index) => Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 15),
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(148, 158, 158, 158),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    
-                    child: Center(
-                      child: Text('${widget.route} #${index + 1}'),
-                    ),
-                  ),
-                ),
-              )
-            ]),
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
+
+      bottomNavigationBar: JeepJamBottomNavbar(
+        currentIndex: currentIndex,
+        onTap: (index) {
+          setState(() => currentIndex = index);
+          nav.navigate(context, index); 
+        },
+      ),
     );
   }
 }

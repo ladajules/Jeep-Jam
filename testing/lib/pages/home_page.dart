@@ -7,13 +7,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' hide Marker;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
 
-// pages
-import 'users_saved_routes.dart';
-
 // useful shizzles
 import '../services/location.dart';
 import '../services/weather_service.dart';
 import '../controllers/map_manager.dart';
+import '../controllers/navigation_manager.dart';
 import '../utils/weather_utils.dart';
 import '../widgets/weather_screen.dart';
 import '../widgets/sticky_header_delegate.dart';
@@ -27,12 +25,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0; // for navbar
+  int currentIndex = 0; // for navbar
 
   final LocationService _locationService = LocationService();
   // weather weather lang
   late WeatherService _weatherService;
   final MapManager _mapManager = MapManager();
+  final NavigationManager nav = NavigationManager();
   final logger = Logger(); // e = error; i = info msg; w = warning msg; d = debug msg
 
   Position? _currentPosition;
@@ -124,45 +123,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  List<Widget> _buildPages() {
-    return [
-      _buildMainContent(),
-      // activity page
-      SavedRoutesPage(
-        onBack: (){
-          setState(() {
-            _selectedIndex = 0;
-          });
-        }
-      ),
-      //SettingsPage(),
-    ];
-  }
-
-  // Function for the bottom nav bar
-  void _navigationBottomBar(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch(index) {
-      case 0:
-      break;
-
-      case 1:
-      logger.i('Activity page tapped. Redirecting to saved routes page...');
-      break;
-
-      case 2:
-      logger.i('Saved routes page tapped. Redirecting to saved routes page...');
-      break;
-
-      case 3:
-      logger.i('Settings page tapped. Redirecting to settings page...');
-      break;
-    }
-  }
-
   void _onMapCreated(GoogleMapController controller) {
     _mapManager.setController(controller);
 
@@ -227,76 +187,79 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildPages()[_selectedIndex],
+      body: _buildMainContent(),
     );
   }
 
   Widget _buildMainContent() {
     return Scaffold(
-        body: Stack(
-          children: [
-            // Gogol maps
-            GoogleMap(
-              onMapCreated: _onMapCreated,
-              initialCameraPosition: _initialPosition,
-              markers: _mapManager.markers,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              mapType: MapType.normal,
-              zoomControlsEnabled: false,
-              // liteModeEnabled: true, // once naa najuy gogol maps, ill try erasing this
-            ),
+      body: Stack(
+        children: [
+          // Gogol maps
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: _initialPosition,
+            markers: _mapManager.markers,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
+            mapType: MapType.normal,
+            zoomControlsEnabled: false,
+            // liteModeEnabled: true, // once naa najuy gogol maps, ill try erasing this
+          ),
 
-            // da buttons
-            Positioned(
-              right: 16,
-              bottom: _calculateButtonPosition(),
-              child: Column(
-                children: [
-                  // explore button 
-                  FloatingActionButton(
-                    onPressed: () {
-                      // centers the marker, i saw it somewhere sa YT
-                      _centerMapOnUserLocation();
-                    },
-                    backgroundColor: Colors.white,
-                    elevation: 4,
-                    child: const Icon(
-                      Icons.my_location,
-                      color: Colors.blue,
-                      size: 30,
-                    ),
+          // da buttons
+          Positioned(
+            right: 16,
+            bottom: _calculateButtonPosition(),
+            child: Column(
+              children: [
+                // explore button 
+                FloatingActionButton(
+                  onPressed: () {
+                    // centers the marker, i saw it somewhere sa YT
+                    _centerMapOnUserLocation();
+                  },
+                  backgroundColor: Colors.white,
+                  elevation: 4,
+                  child: const Icon(
+                    Icons.my_location,
+                    color: Colors.blue,
+                    size: 30,
                   ),
-                  SizedBox(height: 15),
+                ),
+                SizedBox(height: 15),
 
-                  // directions button
-                  FloatingActionButton(
-                    onPressed: () {
-                      logger.i('Direction button pressed. Redirecting to directions page... chaaar');
-                      Navigator.pushNamed(context, '/directionspage');
-                    },
-                    backgroundColor: Colors.white,
-                    elevation: 4,
-                    child: const Icon(
-                      Icons.directions,
-                      color: Colors.blue,
-                      size: 30,
-                    ),
+                // directions button
+                FloatingActionButton(
+                  onPressed: () {
+                    logger.i('Direction button pressed. Redirecting to directions page... chaaar');
+                    Navigator.pushNamed(context, '/directionspage');
+                  },
+                  backgroundColor: Colors.white,
+                  elevation: 4,
+                  child: const Icon(
+                    Icons.directions,
+                    color: Colors.blue,
+                    size: 30,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            // draggable bottom sheet
-            _buildBottomSheet(),
-          ],
-        ), 
+          // draggable bottom sheet
+          _buildBottomSheet(),
+        ],
+      ), 
 
-        bottomNavigationBar: JeepJamBottomNavbar(
-          selectedIndex: _selectedIndex,
-          onTap: _navigationBottomBar,
-        ),
-      );
+      bottomNavigationBar: JeepJamBottomNavbar(
+        currentIndex: currentIndex,
+        onTap: (index) {
+          setState(() => currentIndex = index);
+          nav.navigate(context, index); 
+        },
+      ),
+    );
   }
 
   Widget _buildBottomSheet() {

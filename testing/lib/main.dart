@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-//import 'package:testing/pages/users_saved_routes.dart';
-import 'package:testing/pages/directions_page.dart';
-import 'package:testing/pages/introduction_page.dart';
-import 'package:testing/pages/home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+// pages
+import 'package:testing/pages/introduction_page.dart';
+import 'package:testing/pages/home_page.dart';
+import 'package:testing/pages/recent_activity_page.dart';
+import 'package:testing/pages/users_saved_routes.dart';
+import 'package:testing/pages/settings_page.dart';
+import 'package:testing/pages/directions_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +30,9 @@ class MyApp extends StatelessWidget{
         '/intropage': (context) => const OnboardingPage1(),
         '/homepage': (context) => const HomePage(),
         '/directionspage': (context) => const DirectionsPage(),
-        //'/savedroutespage': (context) => const SavedRoutes(),
+        '/savedroutespage': (context) => const SavedRoutesPage(),
+        '/settingspage': (context) => const SettingsPage(),
+        '/activitypage': (context) => const RecentActivityPage(),
       }
     );
   }
