@@ -128,7 +128,13 @@ class _HomePageState extends State<HomePage> {
     return [
       _buildMainContent(),
       // activity page
-      SavedRoutesPage(),
+      SavedRoutesPage(
+        onBack: (){
+          setState(() {
+            _selectedIndex = 0;
+          });
+        }
+      ),
       //SettingsPage(),
     ];
   }
