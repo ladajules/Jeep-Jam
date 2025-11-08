@@ -93,7 +93,7 @@ class LocationService {
 
   }
 
-  Future getCurrentPlaceName () async{
+  Future getCurrentCity () async{
     LocationPermission permission = await Geolocator.checkPermission();
 
     if (permission == LocationPermission.denied) {
@@ -106,9 +106,9 @@ class LocationService {
 
     List <Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
 
-    String? name = placemarks[0].name;
+    String? city = placemarks[0].locality;
 
-    return name ?? "";
+    return city ?? "";
 
   }
 
