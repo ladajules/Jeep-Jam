@@ -1,5 +1,3 @@
-//this is a modal for the users_savedRoutes
-
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:testing/widgets/sticky_header_delegate.dart';
