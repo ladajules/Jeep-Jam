@@ -17,11 +17,12 @@ import '../widgets/weather_screen.dart';
 import '../widgets/sticky_header_delegate.dart';
 import '../widgets/bottom_nav_bar.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatefulWidget /*with AutomaticKeepAliveClientMixin*/ {
   const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
+  //bool get wantKeepAlive => true;
 }
 
 class _HomePageState extends State<HomePage> {
@@ -186,6 +187,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //super.build(context);
     return Scaffold(
       body: _buildMainContent(),
     );
