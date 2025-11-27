@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "790590576088",
+    "project_id": "jeepjam-61e45",
+    "storage_bucket": "jeepjam-61e45.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:790590576088:android:c2ec519263928fd4c3cead",
+        "android_client_info": {
+          "package_name": "com.mgt.jeepjam"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE38vXV_AC9Bp_OqCH_ym1zsR6z6u5SD4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

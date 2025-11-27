@@ -17,6 +17,7 @@ import '../widgets/weather_screen.dart';
 import '../widgets/sticky_header_delegate.dart';
 import '../widgets/bottom_nav_bar.dart';
 
+
 class HomePage extends StatefulWidget /*with AutomaticKeepAliveClientMixin*/ {
   const HomePage({super.key});
 
@@ -86,9 +87,12 @@ class _HomePageState extends State<HomePage> {
       if (_currentPosition != null) {
         final weather = await _weatherService.getWeather(_currentPosition!.longitude, _currentPosition!.latitude);
 
-        setState(() {
-          _weather = weather;
-        });
+        if (mounted){
+          setState(() {
+            _weather = weather;
+          });
+        }
+        
       }
     } catch (e) {
       logger.e('Failed to fetch weather: $e');
@@ -101,26 +105,33 @@ class _HomePageState extends State<HomePage> {
 
     final position = await _locationService.getCurrentLocation();
     if (position == null) {
+      if (mounted){
       setState(() => _status = "Location permission denied or service off.");
+      }
       return;
     }
 
     final placemark = await _locationService.getAddressFromCoordinates(position);
+  if (mounted){
+      setState(() {
+        _currentPosition = position;
+        _currentAddress = placemark;
+        _status = placemark != null ? "Location fetched successfully!" : "Failed to get address";
+      });
+  }
 
-    setState(() {
-      _currentPosition = position;
-      _currentAddress = placemark;
-      _status = placemark != null ? "Location fetched successfully!" : "Failed to get address";
-    });
 
     await _fetchWeather();
 
-    if (_mapManager.controller != null) {
+    if (_mapManager.controller != null && mounted) {
       await _mapManager.animateToLocation(position);
       _mapManager.updateUserMarker(position, placemark);
-      setState(() {
-        
-      });
+      if (mounted){
+        setState(() {
+                
+        }); 
+      }
+      
     }
   }
 

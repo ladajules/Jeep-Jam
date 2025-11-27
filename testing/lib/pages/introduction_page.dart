@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:testing/pages/login_register_page.dart';
 
 class OnboardingPage1 extends StatelessWidget {
   const OnboardingPage1({super.key});
 
   Future<void> _markTutorialSeen(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('SeenTutorial', true);
+    await prefs.setBool(kSeenTutorialKey, true);
     if (context.mounted) Navigator.pushReplacementNamed(context, '/homepage');
   }
+
 
   @override
   Widget build(BuildContext context) {
