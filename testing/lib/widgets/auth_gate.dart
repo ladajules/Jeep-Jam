@@ -1,11 +1,13 @@
 
 
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:testing/pages/home_page.dart';
 import 'package:testing/pages/introduction_page.dart';
 import 'package:testing/pages/login_register_page.dart';
+import 'package:testing/pages/verify_email.dart';
 import 'package:testing/services/auth.dart';
 
 const String kSeenTutorialKey = 'SeenTutorial';
@@ -37,7 +39,11 @@ class AuthGate extends StatelessWidget {
         
 
         if (snapshot.hasData){
-        
+          final User user = snapshot.data!;
+
+          if (!user.emailVerified){
+            return const EmailVerificationPage();
+          }
           return  FutureBuilder<bool>(
             future: _getTutorialStatus(),
             builder: (context, tutorialSnapshot) {

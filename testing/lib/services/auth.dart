@@ -36,7 +36,9 @@ class Auth{
       email: email,
       password: password,
        );
+       await sendEmailVerification();
       logger.i('Sign in successful');
+      
     } catch (e){
       logger.e('Sign in error');
       rethrow;
@@ -52,6 +54,27 @@ class Auth{
       logger.e('error wid sending passwordemaillink');
     }
   }
+
+
+  Future<void> sendEmailVerification() async {
+    try {
+      User? user = currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        logger.i('Verification email sent');
+      }
+    } catch (e) {
+      logger.e('Error sending verification email: $e');
+      rethrow;
+    }
+  }
+
+    Future<void> reloadUser() async {
+    await currentUser?.reload();
+  }
+
+  bool get isEmailVerified => currentUser?.emailVerified ?? false;
+
 
   Future<void> signOut() async{
     await _firebaseAuth.signOut();

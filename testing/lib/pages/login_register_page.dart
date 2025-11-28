@@ -36,21 +36,27 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
           password: _passwordController.text.trim(),
           );
           logger.i('Login Successful');
+
+          await _auth.reloadUser();
+          if (!_auth.isEmailVerified){
+             if (mounted) {
+            Navigator.of(context).pushReplacementNamed('/verifyemail');
+          }
+            return;
+          }
       } else {
         await _auth.createUserWithEmailAndPassword(
           email: _emailController.text.trim(), 
           password: _passwordController.text.trim(),
           );
+          
           logger.i('Registration Successful');
 
           final prefs = await SharedPreferences.getInstance();
           await prefs.setBool(kSeenTutorialKey, false);
 
           if(mounted){
-            Navigator.of(context).pushNamedAndRemoveUntil(
-          '/intropage', 
-          (route) => false // Clears all previous routes
-            );
+            Navigator.of(context).pushReplacementNamed('/verifyemail');
           }
 
           

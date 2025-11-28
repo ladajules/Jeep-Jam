@@ -10,6 +10,7 @@ import 'package:testing/pages/recent_activity_page.dart';
 import 'package:testing/pages/users_saved_routes.dart';
 import 'package:testing/pages/settings_page.dart';
 import 'package:testing/pages/directions_page.dart';
+import 'package:testing/pages/verify_email.dart';
 import 'package:testing/widgets/auth_gate.dart';
 import 'package:testing/pages/forget_pass.dart';
 
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget{
         '/settingspage': (context) => const SettingsPage(),
         '/activitypage': (context) => const RecentActivityPage(),
         '/forgotpass' : (context) => const ForgotPassword(),
+        '/verifyemail' : (context) => const EmailVerificationPage(),
       }
     );
   }
