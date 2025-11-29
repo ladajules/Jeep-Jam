@@ -41,4 +41,12 @@ class MapManager {
       ),
     };
   }
+
+  void animateToLatLng(double lat, double lng) {
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLng(
+        LatLng(lat, lng),
+      ),
+    );
+  }
 }

@@ -112,14 +112,14 @@ class _HomePageState extends State<HomePage> {
     }
 
     final placemark = await _locationService.getAddressFromCoordinates(position);
-  if (mounted){
-      setState(() {
-        _currentPosition = position;
-        _currentAddress = placemark;
-        _status = placemark != null ? "Location fetched successfully!" : "Failed to get address";
-      });
-  }
 
+    if (mounted){
+        setState(() {
+          _currentPosition = position;
+          _currentAddress = placemark;
+          _status = placemark != null ? "Location fetched successfully!" : "Failed to get address";
+        });
+    }
 
     await _fetchWeather();
 
@@ -131,7 +131,7 @@ class _HomePageState extends State<HomePage> {
                 
         }); 
       }
-      
+    
     }
   }
 
@@ -226,7 +226,6 @@ class _HomePageState extends State<HomePage> {
             bottom: _calculateButtonPosition(),
             child: Column(
               children: [
-                // explore button 
                 FloatingActionButton(
                   onPressed: () {
                     // centers the marker, i saw it somewhere sa YT

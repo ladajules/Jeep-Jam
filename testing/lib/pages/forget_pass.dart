@@ -1,5 +1,3 @@
-
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:testing/services/auth.dart';
@@ -55,9 +53,6 @@ final Auth _auth = Auth();
     _emailController.dispose();
     super.dispose();
   }
-
-
-
 
   @override
   Widget build (BuildContext context){

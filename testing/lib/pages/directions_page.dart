@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:logger/logger.dart';
+
 import 'package:testing/pages/destination_search_page.dart';
 import 'package:testing/pages/origin_search_page.dart';
+import 'package:testing/pages/directions_result_page.dart';
+
 import '../services/location.dart';
+import '../services/firebase_service.dart';
 
 class DirectionsPage extends StatefulWidget {
   const DirectionsPage({super.key});
@@ -15,6 +19,7 @@ class DirectionsPage extends StatefulWidget {
 
 class _DirectionsPageState extends State<DirectionsPage> {
   final LocationService _locationService = LocationService();
+  final FirebaseService _firebaseService = FirebaseService();
   final logger = Logger();
 
   final TextEditingController _originController = TextEditingController();
@@ -36,10 +41,21 @@ class _DirectionsPageState extends State<DirectionsPage> {
   // ignore: unused_field
   Map<String, dynamic>? _originDetails;
 
+  List<Map<String, dynamic>> _recentSearches = [];
+  List<Map<String, dynamic>> _suggestedPlaces = [];
+  List<Map<String, dynamic>> _savedRoutes = [];
+
+  bool _isLoadingRecent = false;
+  bool _isLoadingSuggested = false;
+  bool _isLoadingSaved = false;
+
   @override
   void initState() {
     super.initState();
     _getLocationAndAddress();
+    _loadRecentSearches();
+    _loadSuggestedPlaces();
+    _loadSavedRoutes();
   }
 
   Future<void> _getLocationAndAddress() async {
@@ -57,6 +73,15 @@ class _DirectionsPageState extends State<DirectionsPage> {
 
         if (placemark != null) {
           _originController.text = '${placemark.street}, ${placemark.locality}';
+
+          _originDetails = {
+            'placeId': 'current_location',
+            'name': '${placemark.street}, ${placemark.locality}',
+            'address': '${placemark.street}, ${placemark.locality}',
+            'fullText': '${placemark.street}, ${placemark.subLocality}, ${placemark.locality}',
+            'latitude': position.latitude,
+            'longitude': position.longitude,
+          };
         } else {
           _originController.text = 'From where?';
         }
@@ -69,6 +94,34 @@ class _DirectionsPageState extends State<DirectionsPage> {
     }
   }
 
+  Future<void> _loadRecentSearches() async {
+    setState(() => _isLoadingRecent = true);
+    final searches = await _firebaseService.getRecentSearches();
+    setState(() {
+      _recentSearches = searches;
+      _isLoadingRecent = false;
+    });
+  }
+
+  Future<void> _loadSuggestedPlaces() async {
+    setState(() => _isLoadingSuggested = true);
+    final places = await _firebaseService.getSuggestedPlaces();
+
+    setState(() {
+      _suggestedPlaces = places;
+      _isLoadingSuggested = false;
+    });
+  }
+
+  Future<void> _loadSavedRoutes() async {
+    setState(() => _isLoadingSaved = true);
+    final routes = await _firebaseService.getSavedRoutes();
+    setState(() {
+      _savedRoutes = routes;
+      _isLoadingSaved = false;
+    });
+  }
+
   Future<void> _openOriginSearch() async {
     final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => OriginSearchPage(
       userLatitude: _currentPosition?.latitude,
@@ -79,7 +132,7 @@ class _DirectionsPageState extends State<DirectionsPage> {
     if (result != null && result is Map) {
       setState(() {
         _originDetails = {
-          'placeId': result['name'],
+          'placeId': result['name'] ?? result['name'],
           'name': result['name'],
           'address': result['address'],
           'fullText': result['fullText'],
@@ -104,7 +157,7 @@ class _DirectionsPageState extends State<DirectionsPage> {
     if (result != null && result is Map) {
       setState(() {
         _destinationDetails = {
-          'placeId': result['name'],
+          'placeId': result['name'] ?? result['name'],
           'name': result['name'],
           'address': result['address'],
           'fullText': result['fullText'],
@@ -119,7 +172,7 @@ class _DirectionsPageState extends State<DirectionsPage> {
     }
   }
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
     if (_originController.text.isEmpty || _destinationController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -132,6 +185,46 @@ class _DirectionsPageState extends State<DirectionsPage> {
             ),
           ),
           backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (_originDetails == null || _destinationDetails == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please select valid locations from the search',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+            ),
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (_originDetails!['latitude'] == null || 
+        _originDetails!['longitude'] == null ||
+        _destinationDetails!['latitude'] == null || 
+        _destinationDetails!['longitude'] == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Invalid location coordinates. Please try again.',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+            ),
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
         ),
       );
       return;
@@ -140,13 +233,272 @@ class _DirectionsPageState extends State<DirectionsPage> {
     logger.i('Origin: ${_originController.text}');
     logger.i('Destination: ${_destinationController.text}');
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Searching for directions...'),
-        backgroundColor: Colors.green,
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DirectionsResultPage(
+          originDetails: _originDetails!,
+          destinationDetails: _destinationDetails!,
+        ),
       ),
     );
   }
+
+  void _selectRecentSearch(Map<String, dynamic> search) {
+    setState(() {
+      _originDetails = search['originDetails'];
+      _destinationDetails = search['destinationDetails'];
+      _originController.text = search['origin'];
+      _destinationController.text = search['destination'];
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Recent search loaded'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _selectSuggestedPlace(Map<String, dynamic> place) async {
+    final location = await _locationService.getCoordinatesFromAddress(place['location']);
+
+    if (location != null) {
+      setState(() {
+        _destinationDetails = {
+          'placeId': place['id'],
+          'name': place['location'],
+          'address': place['location'],
+          'fullText': place['location'],
+          'latitude': location.latitude,
+          'longitude': location.longitude,
+        };
+        _destinationController.text = place['location'];
+      });
+      
+      // if (!mounted) return;
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('${place['location']} set as destination'),
+      //     duration: const Duration(seconds: 1),
+      //     backgroundColor: Colors.green,
+      //   ),
+      // );
+    }
+  }
+
+  void _selectSavedRoute(Map<String, dynamic> route) {
+    setState(() {
+      _originDetails = route['originDetails'];
+      _destinationDetails = route['destinationDetails'];
+      _originController.text = route['origin'];
+      _destinationController.text = route['destination'];
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${route['routeName']} loaded'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  Future<void> _deleteSavedRoute(String routeId, String routeName) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Route'),
+        content: Text('Delete "$routeName"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await _firebaseService.deleteSavedRoute(routeId);
+      _loadSavedRoutes();
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Route deleted'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _showAddRouteDialog() async {
+  final TextEditingController routeNameController = TextEditingController();
+
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Save Current Route'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Give this route a name:',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: routeNameController,
+            decoration: InputDecoration(
+              hintText: 'e.g., Home to Work',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            ),
+            autofocus: true,
+          ),
+          const SizedBox(height: 16),
+          if (_originController.text.isNotEmpty && _destinationController.text.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.circle, size: 12, color: Colors.blue[700]),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _originController.text,
+                          style: const TextStyle(fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.circle, size: 12, color: Colors.red),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _destinationController.text,
+                          style: const TextStyle(fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber, size: 20, color: Colors.orange[700]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Please set origin and destination first',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange[900],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            if (routeNameController.text.trim().isEmpty) {
+              Navigator.pop(context, false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please enter a route name'),
+                  backgroundColor: Colors.red,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+              return;
+            }
+            
+            if (_originDetails == null || _destinationDetails == null) {
+              Navigator.pop(context, false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please set origin and destination first'),
+                  backgroundColor: Colors.red,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+              return;
+            }
+            
+            Navigator.pop(context, true);
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
+
+  if (result == true && routeNameController.text.trim().isNotEmpty) {
+    await _firebaseService.saveRoute(
+      routeName: routeNameController.text.trim(),
+      origin: _originController.text,
+      destination: _destinationController.text,
+      originDetails: _originDetails!,
+      destinationDetails: _destinationDetails!,
+    );
+
+    await _loadSavedRoutes();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('"${routeNameController.text.trim()}" saved successfully'),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  routeNameController.dispose();
+}
 
   @override
   void dispose() {
@@ -359,7 +711,6 @@ class _DirectionsPageState extends State<DirectionsPage> {
         setState(() {
           _selectedTab = index;
         });
-        logger.i('$title tab selected...');
       },
 
       child: Container(
@@ -367,14 +718,6 @@ class _DirectionsPageState extends State<DirectionsPage> {
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue.withValues(alpha: 0.8) : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          // boxShadow: [
-          //   if (isSelected) BoxShadow(
-          //     color: Colors.blue.withValues(alpha: 0.3),
-          //     spreadRadius: 1,
-          //     blurRadius: 4,
-          //     offset: const Offset(0, 2),
-          //   )
-          // ],
         ),
 
         child: Text(
@@ -406,31 +749,58 @@ class _DirectionsPageState extends State<DirectionsPage> {
   }
 
   Widget _buildRecentList() {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      children: [
-        // list to see
-        ...List.generate(15, (index) => Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: Container(
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withValues(alpha: 0.2),
-                  spreadRadius: 1,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+    if (_isLoadingRecent) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_recentSearches.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.history,
+              size: 64,
+              color: Colors.grey[400],
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            const SizedBox(height: 16),
+            Text(
+              'No recent searches',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      itemCount: _recentSearches.length,
+      itemBuilder: (context, index) {
+        final search = _recentSearches[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12.0),
+          child: GestureDetector(
+            onTap: () => _selectRecentSearch(search),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.2),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: Row(
                 children: [
-                  // clock icon
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -445,148 +815,221 @@ class _DirectionsPageState extends State<DirectionsPage> {
                   ),
                   const SizedBox(width: 16),
                   
-                  // full full address
                   Expanded(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Recent Search ${index + 1}',
+                          search['origin'],
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 14,
                             color: Colors.black,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          'Sample location address',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
+                        Row(
+                          children: [
+                            const Icon(Icons.arrow_forward, size: 12, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                search['destination'],
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[600],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
                   
-                  GestureDetector(
-                    onTap: () {
-                      logger.i('Recent Search ${index + 1} pressed...');
-                    },
-                    child: Icon(
-                      Icons.arrow_forward,
-                      size: 22,
-                      color: Colors.black,
-                    ),
+                  const Icon(
+                    Icons.arrow_forward,
+                    size: 22,
+                    color: Colors.black,
                   ),
                 ],
               ),
             ),
           ),
-        )),
-        
-        const SizedBox(height: 20),
-      ],
+        );
+      },
     );
   }
 
   Widget _buildSuggestedList() {
-    return ListView(
+    if (_isLoadingSuggested) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 2),
-      children: [
-        // list to see
-        ...List.generate(15, (index) => Padding(
+      itemCount: _suggestedPlaces.length,
+      itemBuilder: (context, index) {
+        final place = _suggestedPlaces[index];
+        final isLandmark = place['isLandmark'] == true;
+        
+        return Padding(
           padding: const EdgeInsets.only(bottom: 12.0),
-          child: Container(
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withValues(alpha: 0.2),
-                  spreadRadius: 1,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: InkWell(
+            onTap: () => _selectSuggestedPlace(place),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.2),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: Row(
                 children: [
-                  // clock icon
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: isLandmark ? Colors.amber[100] : Colors.grey[200],
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.star_rounded,
-                      color: Colors.grey,
+                    child: Icon(
+                      isLandmark ? Icons.location_city : Icons.trending_up,
+                      color: isLandmark ? Colors.amber[700] : Colors.grey,
                       size: 24,
                     ),
                   ),
                   const SizedBox(width: 16),
                   
-                  // full full address
                   Expanded(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Suggested Place ${index + 1}',
+                          place['location'],
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: Colors.black,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Sample location address',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
+                        if (!isLandmark) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            '${place['count']} searches',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),
                   
-                  GestureDetector(
-                    onTap: () {
-                      logger.i('Suggested Place ${index + 1} pressed...');
-                    },
-                    child: Icon(
-                      Icons.arrow_forward,
-                      size: 22,
-                      color: Colors.black,
-                    ),
+                  const Icon(
+                    Icons.arrow_forward,
+                    size: 22,
+                    color: Colors.black,
                   ),
                 ],
               ),
             ),
           ),
-        )),
-        
-        const SizedBox(height: 20),
-      ],
+        );
+      },
     );
   }
 
   Widget _buildSavedList() {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
+    if (_isLoadingSaved) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_savedRoutes.isEmpty) {
+      Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 32),
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  // navigator push to redirect to saved routes page
+                  _showAddRouteDialog();
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.add_rounded,
+                          color: Colors.blue,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Text(
+                        'Add new',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 50),
+              Column(
+                children: [
+                  Icon(
+                    Icons.bookmark_border,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No saved routes',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
       children: [
         GestureDetector(
           onTap: () {
             // navigator push to redirect to saved routes page
-            logger.i('Add new button pressed in Saved tab...');
+            _showAddRouteDialog();
           },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -621,85 +1064,110 @@ class _DirectionsPageState extends State<DirectionsPage> {
             ),
           ),
         ),
-
-        // list to see
-        ...List.generate(15, (index) => Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: Container(
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withValues(alpha: 0.2),
-                  spreadRadius: 1,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  // clock icon
-                  Container(
-                    padding: const EdgeInsets.all(8),
+        
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            itemCount: _savedRoutes.length,
+            itemBuilder: (context, index) {
+              final route = _savedRoutes[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: GestureDetector(
+                  onTap: () => _selectSavedRoute(route),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.2),
+                          spreadRadius: 1,
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    child: const Icon(
-                      Icons.bookmark_rounded,
-                      color: Colors.grey,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  
-                  // full full address
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Text(
-                          'Saved Route ${index + 1}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Colors.black,
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.bookmark,
+                            color: Colors.blue[700],
+                            size: 24,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'From: Sample location address',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
+                        const SizedBox(width: 16),
+                        
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                route['routeName'],
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${route['origin']} → ${route['destination']}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (route['jeepneyCode'] != null) ...[
+                                const SizedBox(height: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue[100],
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    route['jeepneyCode'].toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.blue[700],
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
+                        ),
+                        
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            size: 22,
+                            color: Colors.red,
+                          ),
+                          onPressed: () => _deleteSavedRoute(route['id'], route['routeName']),
                         ),
                       ],
                     ),
                   ),
-                  
-                  GestureDetector(
-                    child: Icon(
-                      Icons.arrow_forward,
-                      size: 22,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
-        )),
-        
-        const SizedBox(height: 20),
+        ),
       ],
     );
+
   }
 
 }
