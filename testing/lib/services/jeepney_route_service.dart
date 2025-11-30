@@ -1,19 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math' show cos, sin, sqrt, asin, pi;
-import '../services/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class JeepneyRouteService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final LocationService _locationService = LocationService();
   final logger = Logger();
 
-  final Map<String, Location?> _stopLocationCache = {};
   final String _googleApiKey = dotenv.env['GOOGLE_CLOUD_API_KEY']!;
 
   Future<List<JeepneyRouteMatch>> findMatchingRoutes({
@@ -21,24 +17,53 @@ class JeepneyRouteService {
     required double originLng,
     required double destLat,
     required double destLng,
+    String? originName, 
+    String? destName, 
   }) async {
     try {
       logger.i('Finding routes from ($originLat, $originLng) to ($destLat, $destLng)');
 
+      if (originName != null && destName != null) {
+        final cachedResult = await _checkSearchCacheByName(
+          originName, 
+          destName, 
+          originLat, 
+          originLng, 
+          destLat, 
+          destLng
+        );
+        if (cachedResult != null && cachedResult.isNotEmpty) {
+          logger.i('✓ Found ${cachedResult.length} cached routes');
+          return cachedResult;
+        }
+      }
+
+      logger.i('Cache miss, searching all routes...'); // for debugging, dont uncomment unless necessary
+
       final snapshot = await _firestore.collection('jeepney_routes').get();
-      
       List<JeepneyRouteMatch> matchingRoutes = [];
 
       for (var doc in snapshot.docs) {
         String routeCode = doc.id; 
-        List<dynamic> stopsData = doc.data()['route'] ?? [];
-        List<String> stops = stopsData.cast<String>(); 
+        Map<String, dynamic> data = doc.data();
+        List<dynamic> routeData = data['route'] ?? [];
+        List<String> stopNames = [];
+        List<Map<String, dynamic>> stopCoordinates = [];
 
-        logger.d('Checking route $routeCode with ${stops.length} stops');
+        for (var stop in routeData) {
+          if (stop is Map<String, dynamic>) {
+            stopNames.add(stop['name'] ?? 'Unknown Stop');
+            stopCoordinates.add({
+              'lat': stop['lat'],
+              'lng': stop['lng'],
+            });
+          }
+        }
 
         JeepneyRouteMatch? match = await _checkIfJeepneyCanServeTrip(
           routeCode: routeCode,
-          jeepneyStops: stops,
+          stopNames: stopNames,
+          stopCoordinates: stopCoordinates,
           userOriginLat: originLat,
           userOriginLng: originLng,
           userDestLat: destLat,
@@ -56,37 +81,190 @@ class JeepneyRouteService {
       logger.i('Found ${matchingRoutes.length} matching routes');
 
       return matchingRoutes;
-      
     } catch (e) {
       logger.e('Error finding routes: $e');
       return [];
     }
   }
 
+  Future<List<JeepneyRouteMatch>?> _checkSearchCacheByName(
+    String origin,
+    String dest,
+    double originLat,
+    double originLng,
+    double destLat,
+    double destLng,
+  ) async {
+    try {
+      final cleanOrigin = origin.replaceAll(RegExp(r'[/#]'), '_');
+      final cleanDest = dest.replaceAll(RegExp(r'[/#]'), '_');
+      final docId = '$cleanOrigin - $cleanDest';
+
+      logger.i('Checking cache for: $docId');
+
+      final docSnapshot = await _firestore.collection('search_cache').doc(docId).get();
+
+      if (docSnapshot.exists) {
+        logger.i('Cache hit! Found cached route for $origin -> $dest');
+        
+        final data = docSnapshot.data()!;
+        List<dynamic> cachedCodes = data['codes'] ?? [];
+        
+        if (cachedCodes.isEmpty) {
+          logger.w('Cache exists but no codes found');
+          return null;
+        }
+
+        logger.i('Found ${cachedCodes.length} cached codes: $cachedCodes');
+
+        List<JeepneyRouteMatch> routes = [];
+
+        for (String code in cachedCodes) {
+          final routeDoc = await _firestore.collection('jeepney_routes').doc(code).get();
+
+          final routeData = routeDoc.data()!;
+          List<dynamic> routeArray = routeData['route'] ?? [];
+          List<String> stopNames = [];
+          List<Map<String, dynamic>> stopCoordinates = [];
+
+          for (var stop in routeArray) {
+            if (stop is Map<String, dynamic>) {
+              stopNames.add(stop['name'] ?? 'Unknown Stop');
+              stopCoordinates.add({
+                'lat': stop['lat'],
+                'lng': stop['lng'],
+              });
+            }
+          }
+
+          JeepneyRouteMatch? match = await _checkIfJeepneyCanServeTrip(
+            routeCode: code,
+            stopNames: stopNames,
+            stopCoordinates: stopCoordinates,
+            userOriginLat: originLat,
+            userOriginLng: originLng,
+            userDestLat: destLat,
+            userDestLng: destLng,
+          );
+
+          if (match != null) {
+            routes.add(match);
+            logger.i('✓ Cached route $code matched');
+          } else {
+            logger.w('Cached route $code did not match current coordinates');
+          }
+        }
+
+        if (routes.isNotEmpty) {
+          routes.sort((a, b) => a.totalETA.compareTo(b.totalETA));
+          return routes;
+        } else {
+          logger.w('No cached routes matched the trip requirements');
+          return null;
+        }
+      } else {
+        logger.i('Cache miss - document not found: $docId');
+      }
+    } catch (e) {
+      logger.e('Error checking cache: $e');
+    }
+
+    return null;
+  }
+
+  // Future<List<JeepneyRouteMatch>?> _checkSearchCache(
+  //   double originLat,
+  //   double originLng,
+  //   double destLat,
+  //   double destLng,
+  // ) async {
+  //   try {
+  //     final snapshot = await _firestore.collection('search_cache').get();
+
+  //     for (var doc in snapshot.docs) {
+  //       final data = doc.data();
+        
+  //       if (data['originLat'] != null && data['originLng'] != null &&
+  //         data['destLat'] != null && data['destLng'] != null) {
+
+  //         double cachedOriginLat = data['originLat'].toDouble();
+  //         double cachedOriginLng = data['originLng'].toDouble();
+  //         double cachedDestLat = data['destLat'].toDouble();
+  //         double cachedDestLng = data['destLng'].toDouble();
+
+  //         double originDistance = _calculateDistance(originLat, originLng, cachedOriginLat, cachedOriginLng);
+  //         double destDistance = _calculateDistance(destLat, destLng, cachedDestLat, cachedDestLng);
+
+  //         if (originDistance < 0.1 && destDistance < 0.1) {
+  //           logger.i('Cache hit! Using cached routes');
+            
+  //           List<dynamic> cachedCodes = data['codes'] ?? [];
+  //           List<JeepneyRouteMatch> routes = [];
+
+  //           for (String code in cachedCodes) {
+  //             final routeDoc = await _firestore.collection('jeepney_routes').doc(code).get();
+              
+  //             if (!routeDoc.exists) continue;
+
+  //             final routeData = routeDoc.data()!;
+  //             List<dynamic> stopsData = routeData['route'] ?? [];
+  //             List<String> stopNames = stopsData.cast<String>();
+  //             List<dynamic> coordinatesData = routeData['coordinates'] ?? [];
+
+  //             if (coordinatesData.isEmpty) continue;
+
+  //             JeepneyRouteMatch? match = await _checkIfJeepneyCanServeTrip(
+  //               routeCode: code,
+  //               stopNames: stopNames,
+  //               stopCoordinates: coordinatesData,
+  //               userOriginLat: originLat,
+  //               userOriginLng: originLng,
+  //               userDestLat: destLat,
+  //               userDestLng: destLng,
+  //             );
+
+  //             if (match != null) {
+  //               routes.add(match);
+  //             }
+  //           }
+
+  //           routes.sort((a, b) => a.totalETA.compareTo(b.totalETA));
+  //           return routes;
+  //         }
+  //       }
+  //     }
+  //   } catch (e) {
+  //     logger.e('Error checking cache: $e');
+  //   }
+
+  //   return null;
+  // }
+
   Future<JeepneyRouteMatch?> _checkIfJeepneyCanServeTrip({
     required String routeCode,
-    required List<String> jeepneyStops,
+    required List<String> stopNames,
+    required List<dynamic> stopCoordinates,
     required double userOriginLat,
     required double userOriginLng,
     required double userDestLat,
     required double userDestLng,
   }) async {
-    const double maxWalkDistance = 0.3; 
+    const double maxWalkDistance = 0.3;
 
-    StopMatch? boardingStop; 
+    StopMatch? boardingStop;
     StopMatch? alightingStop;
 
-    for (int i = 0; i < jeepneyStops.length; i++) {
-      String stopName = jeepneyStops[i];
-      
-      Location? stopLocation = await _geocodeStop(stopName);
-      if (stopLocation == null) {
-        logger.w('Could not geocode stop: $stopName');
+    for (int i = 0; i < stopCoordinates.length; i++) {
+      if (i >= stopNames.length) break;
+
+      final coord = stopCoordinates[i];
+      if (coord == null || coord['lat'] == null || coord['lng'] == null) {
         continue;
       }
 
-      double stopLat = stopLocation.latitude;
-      double stopLng = stopLocation.longitude;
+      double stopLat = coord['lat'].toDouble();
+      double stopLng = coord['lng'].toDouble();
+      String stopName = stopNames[i];
 
       if (boardingStop == null) {
         double distanceToOrigin = _calculateDistance(
@@ -104,7 +282,6 @@ class JeepneyRouteService {
             longitude: stopLng,
             walkDistance: distanceToOrigin,
           );
-          logger.d('Found boarding stop: $stopName (${distanceToOrigin.toStringAsFixed(2)}km from origin)');
         }
       }
 
@@ -124,8 +301,7 @@ class JeepneyRouteService {
             longitude: stopLng,
             walkDistance: distanceToDest,
           );
-          logger.d('Found alighting stop: $stopName (${distanceToDest.toStringAsFixed(2)}km from destination)');
-          break; 
+          break;
         }
       }
     }
@@ -133,7 +309,7 @@ class JeepneyRouteService {
     if (boardingStop != null && alightingStop != null) {
       return await _buildRouteMatch(
         routeCode: routeCode,
-        jeepneyStops: jeepneyStops,
+        jeepneyStops: stopNames,
         boardingStop: boardingStop,
         alightingStop: alightingStop,
         userOriginLat: userOriginLat,
@@ -156,12 +332,35 @@ class JeepneyRouteService {
     required double userDestLat,
     required double userDestLng,
   }) async {
-    List<LatLng> routePolyline = await _getSimplifiedRoutePath(
+    List<LatLng> routePolyline = await _getRoutePath(
       originLat: boardingStop.latitude,
       originLng: boardingStop.longitude,
       destLat: alightingStop.latitude,
       destLng: alightingStop.longitude,
+      travelMode: 'DRIVE',
     );
+
+    List<LatLng> walkToOriginPoints = [];
+    if (boardingStop.walkDistance > 0.05) {
+      walkToOriginPoints = await _getRoutePath(
+        originLat: userOriginLat,
+        originLng: userOriginLng,
+        destLat: boardingStop.latitude,
+        destLng: boardingStop.longitude,
+        travelMode: 'WALK', 
+      );
+    }
+
+    List<LatLng> walkFromDestPoints = [];
+    if (alightingStop.walkDistance > 0.05) {
+      walkFromDestPoints = await _getRoutePath(
+        originLat: alightingStop.latitude,
+        originLng: alightingStop.longitude,
+        destLat: userDestLat,
+        destLng: userDestLng,
+        travelMode: 'WALK', 
+      );
+    }
 
     double rideDistance = await _getRouteDistance(
       originLat: boardingStop.latitude,
@@ -171,7 +370,6 @@ class JeepneyRouteService {
     );
 
     double fare = _calculateFare(rideDistance);
-
     int walkToStopTime = _calculateWalkTime(boardingStop.walkDistance);
     int rideTime = _calculateRideTime(rideDistance);
     int walkFromStopTime = _calculateWalkTime(alightingStop.walkDistance);
@@ -183,6 +381,8 @@ class JeepneyRouteService {
       destStop: alightingStop,
       allStops: jeepneyStops,
       routePoints: routePolyline,
+      walkToOriginPoints: walkToOriginPoints, 
+      walkFromDestPoints: walkFromDestPoints,
       distance: rideDistance,
       fare: fare,
       walkToStopTime: walkToStopTime,
@@ -194,11 +394,12 @@ class JeepneyRouteService {
     );
   }
 
-  Future<List<LatLng>> _getSimplifiedRoutePath({
+  Future<List<LatLng>> _getRoutePath({
     required double originLat,
     required double originLng,
     required double destLat,
     required double destLng,
+    String travelMode = 'DRIVE',
   }) async {
     try {
       final url = Uri.parse('https://routes.googleapis.com/directions/v2:computeRoutes');
@@ -221,7 +422,7 @@ class JeepneyRouteService {
               'latLng': {'latitude': destLat, 'longitude': destLng}
             }
           },
-          'travelMode': 'DRIVE',
+          'travelMode': travelMode,
           'polylineQuality': 'OVERVIEW', 
         }),
       );
@@ -290,29 +491,6 @@ class JeepneyRouteService {
     }
     
     return _calculateDistance(originLat, originLng, destLat, destLng);
-  }
-
-  Future<Location?> _geocodeStop(String stopName) async {
-    if (_stopLocationCache.containsKey(stopName)) {
-      return _stopLocationCache[stopName];
-    }
-
-    try {
-      Location? location = await _locationService.getCoordinatesFromAddress(
-        '$stopName, Cebu City, Philippines',
-      );
-
-      if (location != null) {
-        _stopLocationCache[stopName] = location;
-        logger.d('Geocoded: $stopName -> (${location.latitude}, ${location.longitude})');
-        return location;
-      }
-    } catch (e) {
-      logger.w('Failed to geocode: $stopName - $e');
-    }
-
-    _stopLocationCache[stopName] = null;
-    return null;
   }
 
   double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -390,11 +568,7 @@ class JeepneyRouteService {
 
     return points;
   }
-
-  void clearCache() {
-    _stopLocationCache.clear();
-    logger.i('Geocoding cache cleared');
-  }
+  
 }
 
 class JeepneyRouteMatch {
@@ -403,6 +577,8 @@ class JeepneyRouteMatch {
   final StopMatch destStop; 
   final List<String> allStops; 
   final List<LatLng> routePoints; 
+  final List<LatLng> walkToOriginPoints; 
+  final List<LatLng> walkFromDestPoints;
   final double distance; 
   final double fare; 
   final int walkToStopTime; 
@@ -418,6 +594,8 @@ class JeepneyRouteMatch {
     required this.destStop,
     required this.allStops,
     required this.routePoints,
+    required this.walkToOriginPoints,
+    required this.walkFromDestPoints,
     required this.distance,
     required this.fare,
     required this.walkToStopTime,

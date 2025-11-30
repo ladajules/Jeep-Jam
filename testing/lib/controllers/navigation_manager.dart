@@ -23,7 +23,7 @@ class NavigationManager {
 
       case 3:
       logger.i("Settings page tapped. Redirecting to settings page...");
-      Navigator.pushReplacementNamed(context, "/settingspage");
+      Navigator.pushReplacementNamed(context, "/profilepage");
       break;
     }
   }

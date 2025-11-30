@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 //import 'package:geocoding/geocoding.dart';
 import '../services/jeepney_route_service.dart';
 import '../services/firebase_service.dart';
+import 'dart:ui' as ui;
 //import '../controllers/map_manager.dart';
 
 class DirectionsResultPage extends StatefulWidget {
@@ -38,12 +39,37 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
   final DraggableScrollableController _scrollController = DraggableScrollableController();
 
   double _sheetPosition = 0.25;
+  bool _isRouteSaved = false;
+  String? _savedRouteId;
 
   @override
   void initState() {
     super.initState();
     _initializeDirections();
     _setupScrollListener();
+    _checkIfRouteSaved();
+  }
+
+  Future<void> _checkIfRouteSaved() async {
+    try {
+      final savedRoutes = await _firebaseService.getSavedRoutes();
+      
+      final savedRoute = savedRoutes.firstWhere(
+        (route) {
+          logger.i('Comparing with saved route - Origin: ${route['origin']}, Dest: ${route['destination']}, ID: ${route['id']}');
+          return route['origin'] == widget.originDetails['name'] &&
+                route['destination'] == widget.destinationDetails['name'];
+        },
+        orElse: () => {},
+      );
+      
+      setState(() {
+        _isRouteSaved = savedRoute.isNotEmpty;
+        _savedRouteId = savedRoute.isNotEmpty ? savedRoute['id'] : null;
+      });
+    } catch (e) {
+      logger.e('Error checking if route is saved: $e');
+    }
   }
 
   Future<void> cacheRecentSearch({
@@ -89,7 +115,54 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
     setState(() => _isLoading = false);
   }
 
-  void _addLocationMarkers() {
+  Future<BitmapDescriptor> _bitmapFromIcon(IconData icon) async {
+    final pictureRecorder = ui.PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
+    final iconPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+
+    iconPainter.text = TextSpan(
+      text: String.fromCharCode(icon.codePoint),
+      style: TextStyle(
+        fontSize: 40.0,
+        color: Colors.blue,
+        fontFamily: icon.fontFamily,
+        package: icon.fontPackage,
+      ),
+    );
+
+    iconPainter.layout();
+    iconPainter.paint(canvas, Offset.zero);
+
+    final picture = pictureRecorder.endRecording();
+    final image = await picture.toImage(64, 64);
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    // ignore: deprecated_member_use
+    return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
+  }
+
+  void _addLocationMarkers() async {
+    // origin marker
+    final blueGpsIcon = await _bitmapFromIcon(Icons.circle);
+
+    _markers.add(
+      Marker(
+        markerId: MarkerId('origin'),
+        position: LatLng(
+          widget.originDetails['latitude'],
+          widget.originDetails['longitude'],
+        ),
+        icon: blueGpsIcon,
+        infoWindow: InfoWindow(
+          title: "You are here",
+          snippet: widget.originDetails['name'],
+        ),
+      ),
+    );
+
+    // dest marker
     _markers.add(
       Marker(
         markerId: const MarkerId('destination'),
@@ -113,6 +186,8 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
         originLng: widget.originDetails['longitude'],
         destLat: widget.destinationDetails['latitude'],
         destLng: widget.destinationDetails['longitude'],
+        originName: widget.originDetails['name'],   
+        destName: widget.destinationDetails['name'],
       );
 
       setState(() {
@@ -132,9 +207,26 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
     });
   }
 
-  void _updateMapForRoute(JeepneyRouteMatch route) {
+  void _updateMapForRoute(JeepneyRouteMatch route) async {
     _polylines.clear();
     _markers.clear();
+
+    final blueGpsIcon = await _bitmapFromIcon(Icons.circle);
+
+    _markers.add(
+      Marker(
+        markerId: const MarkerId('origin'),
+        position: LatLng(
+          widget.originDetails['latitude'],
+          widget.originDetails['longitude'],
+        ),
+        icon: blueGpsIcon,
+        infoWindow: InfoWindow(
+          title: 'You are here',
+          snippet: widget.originDetails['name'],
+        ),
+      ),
+    );
 
     _markers.add(
       Marker(
@@ -154,16 +246,18 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
     if (route.needsWalkToOrigin) {
       _polylines.add(Polyline(
         polylineId: const PolylineId('walk_to_origin'),
-        points: [
-          LatLng(
-            widget.originDetails['latitude'],
-            widget.originDetails['longitude'],
-          ),
-          LatLng(
-            route.originStop.latitude,
-            route.originStop.longitude,
-          ),
-        ],
+        points: route.walkToOriginPoints.isNotEmpty 
+            ? route.walkToOriginPoints 
+            : [ 
+                LatLng(
+                  widget.originDetails['latitude'],
+                  widget.originDetails['longitude'],
+                ),
+                LatLng(
+                  route.originStop.latitude,
+                  route.originStop.longitude,
+                ),
+              ],
         color: Colors.orange,
         width: 4,
         patterns: [
@@ -171,21 +265,6 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
           PatternItem.gap(5),
         ],
       ));
-
-      _markers.add(
-        Marker(
-          markerId: MarkerId('origin_stop'),
-          position: LatLng(
-            route.originStop.latitude,
-            route.originStop.longitude,
-          ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
-          infoWindow: InfoWindow(
-            title: 'Board Here',
-            snippet: route.originStop.name,
-          ),
-        ),
-      );
     }
 
     if (route.routePoints.isNotEmpty) {
@@ -200,16 +279,18 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
     if (route.needsWalkFromDest) {
       _polylines.add(Polyline(
         polylineId: const PolylineId('walk_from_dest'),
-        points: [
-          LatLng(
-            route.destStop.latitude,
-            route.destStop.longitude,
-          ),
-          LatLng(
-            widget.destinationDetails['latitude'],
-            widget.destinationDetails['longitude'],
-          ),
-        ],
+        points: route.walkFromDestPoints.isNotEmpty
+            ? route.walkFromDestPoints
+            : [ 
+                LatLng(
+                  route.destStop.latitude,
+                  route.destStop.longitude,
+                ),
+                LatLng(
+                  widget.destinationDetails['latitude'],
+                  widget.destinationDetails['longitude'],
+                ),
+              ],
         color: Colors.orange,
         width: 4,
         patterns: [
@@ -252,7 +333,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
     );
 
     _mapController!.animateCamera(
-      CameraUpdate.newLatLngBounds(bounds, 80),
+      CameraUpdate.newLatLngBounds(bounds, 170),
     );
   }
 
@@ -279,6 +360,209 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
     }
   }
 
+  Future<void> _showAddRouteDialog(String origin, String dest) async {
+    if (_isRouteSaved) {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Remove saved route', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Are you sure you want to remove this route?',
+                style: TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.circle, size: 12, color: Colors.blue[700]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            origin,
+                            style: const TextStyle(fontSize: 12),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.circle, size: 12, color: Colors.red),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            dest,
+                            style: const TextStyle(fontSize: 12),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Remove'),
+            ),
+          ],
+        ),
+      );
+
+      if (result == true && _savedRouteId != null) {
+        await _firebaseService.deleteSavedRoute(_savedRouteId!);
+        
+        setState(() {
+          _isRouteSaved = false;
+          _savedRouteId = null;
+        });
+      
+      }
+      return;
+    }
+
+    final TextEditingController routeNameController = TextEditingController();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Save Current Route'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Give this route a name:',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: routeNameController,
+              decoration: InputDecoration(
+                hintText: 'e.g., Home to Work',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              ),
+              autofocus: true,
+            ),
+            const SizedBox(height: 16),
+            if (origin.isNotEmpty && dest.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.circle, size: 12, color: Colors.blue[700]),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            origin,
+                            style: const TextStyle(fontSize: 12),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.circle, size: 12, color: Colors.red),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            dest,
+                            style: const TextStyle(fontSize: 12),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (routeNameController.text.trim().isEmpty) {
+                Navigator.pop(context, false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter a route name'),
+                    backgroundColor: Colors.red,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+                return;
+              }
+              
+              Navigator.pop(context, true);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && routeNameController.text.trim().isNotEmpty) {
+      await _firebaseService.saveRoute(
+        routeName: routeNameController.text.trim(),
+        origin: origin,
+        destination: dest,
+        originDetails: widget.originDetails,
+        destinationDetails: widget.destinationDetails,
+      );
+
+      await _checkIfRouteSaved();
+    }
+
+    routeNameController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -303,7 +587,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
                   ),
                   markers: _markers,
                   polylines: _polylines,
-                  myLocationEnabled: true,
+                  myLocationEnabled: false,
                   myLocationButtonEnabled: false,
                   zoomControlsEnabled: false,
                 ),
@@ -398,6 +682,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
                   child: FloatingActionButton(
                     onPressed: () {
                       // centers the map to see the entire route
+                      _fitRouteInView();
                     },
                     backgroundColor: Colors.white,
                     elevation: 4,
@@ -507,7 +792,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
                 child: Row(
                   children: [
                     const Text(
-                      'Available Routes',
+                      'Public transport',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -519,6 +804,25 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: () {
+                        // pop up dialog
+                        _showAddRouteDialog(widget.originDetails['name'], widget.destinationDetails['name']);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _isRouteSaved ? Icons.bookmark : Icons.bookmark_add_outlined,
+                          color: _isRouteSaved ? Colors.orangeAccent : Colors.black,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -558,7 +862,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
                             ),
                             const SizedBox(height: 8),
                             const Text(
-                              'Cant find jeepneys for this trip',
+                              'Cant find any jeepneys',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,

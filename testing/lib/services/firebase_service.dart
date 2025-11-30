@@ -9,6 +9,7 @@ class FirebaseService {
   final logger = Logger();
 
   String? get currentUserId => _auth.currentUser?.email;
+  User? get currentUser => _auth.currentUser;
 
   // saves origin and dest
   Future<void> saveRecentSearch({
@@ -43,6 +44,10 @@ class FirebaseService {
         codes: codes,
         origin: origin,
         dest: destination,
+        originLat: originDetails['latitude'].toDouble(),
+        originLng: originDetails['longitude'].toDouble(),
+        destLat: destinationDetails['latitude'].toDouble(),
+        destLng: destinationDetails['longitude'].toDouble(),
       );
 
       logger.i('Recent search saved');
@@ -127,6 +132,10 @@ class FirebaseService {
     required List<JeepneyRouteMatch> codes,
     required String origin,
     required String dest,
+    required double originLat,
+    required double originLng,
+    required double destLat,
+    required double destLng,
   }) async {
     try {
       final List<String> codeList = codes.map((c) => c.code).toList();
@@ -141,7 +150,10 @@ class FirebaseService {
         await docRef.update({
           'searchCount': FieldValue.increment(1),
           'codes': codeList, 
-          // 'lastSearched': FieldValue.serverTimestamp(), 
+          'originLat': originLat,
+          'originLng': originLng,
+          'destLat': destLat,
+          'destLng': destLng,
         });
       } else {
         await docRef.set({
@@ -149,7 +161,10 @@ class FirebaseService {
           'dest': dest,
           'codes': codeList,
           'searchCount': 1,
-          // 'lastSearched': FieldValue.serverTimestamp(), 
+          'originLat': originLat,
+          'originLng': originLng,
+          'destLat': destLat,
+          'destLng': destLng,
         });
       }
 
@@ -158,29 +173,80 @@ class FirebaseService {
     }
   }
 
-
-  // gets top 15 most searched locations
+  // gets top most searched dest
   Future<List<Map<String, dynamic>>> getSuggestedPlaces() async {
     try {
       final snapshot = await _firestore
           .collection('search_cache')
-          .orderBy('count', descending: true)
-          .limit(15)
+          .orderBy('searchCount', descending: true)
           .get();
+      
+      Map<String, Map<String, dynamic>> destinationMap = {};
 
-      if (snapshot.docs.isEmpty) {
-        return _getDefaultLandmarks();
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final searchCount = data['searchCount'] ?? 0;
+        
+        if (searchCount >= 2) {
+          String destination = data['dest'] ?? '';
+          
+          if (destination.isNotEmpty) {
+            String normalizedDest = destination.trim();
+            String lowerDest = normalizedDest.toLowerCase();
+
+            if (destinationMap.containsKey(lowerDest)) {
+              destinationMap[lowerDest]!['count'] += searchCount;
+            } else {
+              destinationMap[lowerDest] = {
+                'id': doc.id,
+                'location': normalizedDest, 
+                'count': searchCount,
+                'isLandmark': false,
+              };
+            }
+
+            // popularSearches.add({
+            //   'id': doc.id,
+            //   'location': destination,
+            //   'count': searchCount,
+            //   'isLandmark': false,
+            // });
+          }
+        }
       }
 
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        return {
-          'id': doc.id,
-          'location': data['location'],
-          'count': data['count'],
-          'lastSearched': data['lastSearched'],
-        };
-      }).toList();
+      List<Map<String, dynamic>> popularSearches = destinationMap.values.toList();
+      popularSearches.sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+
+      List<Map<String, dynamic>> defaultLandmarks = _getDefaultLandmarks();
+
+      Set<String> popularDestinations = popularSearches
+          .map((place) => place['location'].toString().toLowerCase())
+          .toSet();
+      
+      List<Map<String, dynamic>> filteredLandmarks = defaultLandmarks
+          .where((landmark) => !popularDestinations.contains(landmark['location'].toString().toLowerCase()))
+          .toList();
+
+      List<Map<String, dynamic>> result = [];
+      
+      if (popularSearches.isNotEmpty) {
+        result.addAll(popularSearches);
+        
+        result.add({
+          'id': 'divider',
+          'location': 'Popular Places',
+          'isDivider': true,
+        });
+      }
+      
+      result.addAll(filteredLandmarks);
+
+      if (result.isEmpty) {
+        return defaultLandmarks;
+      }
+
+      return result;
     } catch (e) {
       logger.e('Error getting suggested places: $e');
       return _getDefaultLandmarks();
@@ -229,11 +295,18 @@ class FirebaseService {
     try {
       if (currentUserId == null) return;
 
+      final cleanRouteName = routeName
+        .replaceAll(RegExp(r'[/\\]'), '_')  
+        .replaceAll(RegExp(r'[^\w\s-]'), '') 
+        .trim()
+        .replaceAll(RegExp(r'\s+'), '_');
+
       await _firestore
           .collection('users')
           .doc(currentUserId)
           .collection('saved_routes')
-          .add({
+          .doc(cleanRouteName)
+          .set({
         'routeName': routeName,
         'origin': origin,
         'destination': destination,
@@ -243,7 +316,7 @@ class FirebaseService {
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      logger.i('Route saved: $routeName');
+      //logger.i('Route saved: $routeName');
     } catch (e) {
       logger.e('Error saving route: $e');
     }
@@ -292,7 +365,7 @@ class FirebaseService {
           .doc(routeId)
           .delete();
 
-      logger.i('Saved route deleted');
+      //logger.i('Saved route deleted');
     } catch (e) {
       logger.e('Error deleting saved route: $e');
     }
@@ -408,4 +481,155 @@ class FirebaseService {
       }).toList();
     });
   }
+
+  Future<void> saveUserProfile({
+    String? displayName,
+    String? phoneNumber,
+    String? photoUrl,
+    Map<String, dynamic>? additionalData,
+  }) async {
+    try {
+      if (currentUserId == null) return;
+
+      final profileData = {
+        'email': currentUser?.email,
+        'displayName': displayName,
+        'phoneNumber': phoneNumber,
+        'photoUrl': photoUrl,
+        'emailVerified': currentUser?.emailVerified ?? false,
+        'lastUpdated': FieldValue.serverTimestamp(),
+        ...?additionalData,
+      };
+
+      await _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .set(profileData, SetOptions(merge: true));
+
+      logger.i('User profile saved');
+    } catch (e) {
+      logger.e('Error saving user profile: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserProfile() async {
+    try {
+      if (currentUserId == null) return null;
+
+      final doc = await _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .get();
+
+      if (!doc.exists) return null;
+
+      return {
+        'id': doc.id,
+        ...doc.data()!,
+      };
+    } catch (e) {
+      logger.e('Error getting user profile: $e');
+      return null;
+    }
+  }
+
+  Future<void> updateUserProfile(Map<String, dynamic> updates) async {
+    try {
+      if (currentUserId == null) return;
+
+      updates['lastUpdated'] = FieldValue.serverTimestamp();
+
+      await _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .update(updates);
+
+      logger.i('User profile updated');
+    } catch (e) {
+      logger.e('Error updating user profile: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteUserProfile() async {
+    try {
+      if (currentUserId == null) return;
+
+      final batch = _firestore.batch();
+
+      batch.delete(_firestore.collection('users').doc(currentUserId));
+
+      final recentSearches = await _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .collection('recent_searches')
+          .get();
+      for (var doc in recentSearches.docs) {
+        batch.delete(doc.reference);
+      }
+
+      final savedRoutes = await _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .collection('saved_routes')
+          .get();
+      for (var doc in savedRoutes.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+      logger.i('User profile and data deleted');
+    } catch (e) {
+      logger.e('Error deleting user profile: $e');
+      rethrow;
+    }
+  }
+
+  Stream<Map<String, dynamic>?> watchUserProfile() {
+    if (currentUserId == null) return Stream.value(null);
+
+    return _firestore
+        .collection('users')
+        .doc(currentUserId)
+        .snapshots()
+        .map((snapshot) {
+      if (!snapshot.exists) return null;
+      return {
+        'id': snapshot.id,
+        ...snapshot.data()!,
+      };
+    });
+  }
+
+  Future<Map<String, int>> getUserStatistics() async {
+    try {
+      if (currentUserId == null) {
+        return {'recentSearches': 0, 'savedRoutes': 0};
+      }
+
+      final recentSearches = await _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .collection('recent_searches')
+          .count()
+          .get();
+
+      final savedRoutes = await _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .collection('saved_routes')
+          .count()
+          .get();
+
+      return {
+        'recentSearches': recentSearches.count ?? 0,
+        'savedRoutes': savedRoutes.count ?? 0,
+      };
+    } catch (e) {
+      logger.e('Error getting user statistics: $e');
+      return {'recentSearches': 0, 'savedRoutes': 0};
+    }
+  }
+
 }

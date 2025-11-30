@@ -81,7 +81,7 @@ class _DestinationSearchPageState extends State<DestinationSearchPage> {
   }
 
   Future<void> _selectPrediction(PlacePrediction prediction) async {
-    logger.i('Selected: ${prediction.description}');
+    //logger.i('Selected: ${prediction.description}');
     
     showDialog(
       context: context,

@@ -143,7 +143,7 @@ class _DirectionsPageState extends State<DirectionsPage> {
 
       _originController.text = result['name'] ?? '';
       
-      logger.i('Origin updated: ${result['fullText']}');
+      //logger.i('Origin updated: ${result['fullText']}');
     }
   }
 
@@ -168,7 +168,7 @@ class _DirectionsPageState extends State<DirectionsPage> {
 
       _destinationController.text = result['name'] ?? '';
       
-      logger.i('Destination updated: ${result['fullText']}');
+      //logger.i('Destination updated: ${result['fullText']}');
     }
   }
 
@@ -230,8 +230,8 @@ class _DirectionsPageState extends State<DirectionsPage> {
       return;
     }
 
-    logger.i('Origin: ${_originController.text}');
-    logger.i('Destination: ${_destinationController.text}');
+    // logger.i('Origin: ${_originController.text}');
+    // logger.i('Destination: ${_destinationController.text}');
     
     if (!mounted) return;
     Navigator.push(
@@ -253,15 +253,17 @@ class _DirectionsPageState extends State<DirectionsPage> {
       _destinationController.text = search['destination'];
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Recent search loaded'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   const SnackBar(
+    //     content: Text('Recent search loaded'),
+    //     duration: Duration(seconds: 1),
+    //   ),
+    // );
   }
 
   void _selectSuggestedPlace(Map<String, dynamic> place) async {
+    if (place['isDivider'] == true) return;
+
     final location = await _locationService.getCoordinatesFromAddress(place['location']);
 
     if (location != null) {
@@ -296,12 +298,12 @@ class _DirectionsPageState extends State<DirectionsPage> {
       _destinationController.text = route['destination'];
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${route['routeName']} loaded'),
-        duration: const Duration(seconds: 1),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text('${route['routeName']} loaded'),
+    //     duration: const Duration(seconds: 1),
+    //   ),
+    // );
   }
 
   Future<void> _deleteSavedRoute(String routeId, String routeName) async {
@@ -338,167 +340,171 @@ class _DirectionsPageState extends State<DirectionsPage> {
   }
 
   Future<void> _showAddRouteDialog() async {
-  final TextEditingController routeNameController = TextEditingController();
+    final TextEditingController routeNameController = TextEditingController();
 
-  final result = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Save Current Route'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Give this route a name:',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: routeNameController,
-            decoration: InputDecoration(
-              hintText: 'e.g., Home to Work',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+    try {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Save Current Route'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Give this route a name:',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            ),
-            autofocus: true,
-          ),
-          const SizedBox(height: 16),
-          if (_originController.text.isNotEmpty && _destinationController.text.isNotEmpty) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
+              const SizedBox(height: 12),
+              TextField(
+                controller: routeNameController,
+                decoration: InputDecoration(
+                  hintText: 'e.g., Home to Work',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                ),
+                autofocus: true,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+              const SizedBox(height: 16),
+              if (_originController.text.isNotEmpty && _destinationController.text.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.circle, size: 12, color: Colors.blue[700]),
+                      Row(
+                        children: [
+                          Icon(Icons.circle, size: 12, color: Colors.blue[700]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _originController.text,
+                              style: const TextStyle(fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.circle, size: 12, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _destinationController.text,
+                              style: const TextStyle(fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ] else ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.orange[200]!),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning_amber, size: 20, color: Colors.orange[700]),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          _originController.text,
-                          style: const TextStyle(fontSize: 12),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          'Please fill in both fields first',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.orange[900],
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.circle, size: 12, color: Colors.red),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _destinationController.text,
-                          style: const TextStyle(fontSize: 12),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
             ),
-          ] else ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.orange[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange[200]!),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.warning_amber, size: 20, color: Colors.orange[700]),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Please set origin and destination first',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.orange[900],
-                      ),
+            TextButton(
+              onPressed: () {
+                if (routeNameController.text.trim().isEmpty) {
+                  Navigator.pop(context, false);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a route name'),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 2),
                     ),
-                  ),
-                ],
-              ),
+                  );
+                  return;
+                }
+                
+                if (_originDetails == null || _destinationDetails == null) {
+                  Navigator.pop(context, false);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please set origin and destination first'),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                }
+                
+                Navigator.pop(context, true);
+              },
+              child: const Text('Save'),
             ),
           ],
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
         ),
-        TextButton(
-          onPressed: () {
-            if (routeNameController.text.trim().isEmpty) {
-              Navigator.pop(context, false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Please enter a route name'),
-                  backgroundColor: Colors.red,
-                  duration: Duration(seconds: 2),
-                ),
-              );
-              return;
-            }
-            
-            if (_originDetails == null || _destinationDetails == null) {
-              Navigator.pop(context, false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Please set origin and destination first'),
-                  backgroundColor: Colors.red,
-                  duration: Duration(seconds: 2),
-                ),
-              );
-              return;
-            }
-            
-            Navigator.pop(context, true);
-          },
-          child: const Text('Save'),
-        ),
-      ],
-    ),
-  );
+      );
 
-  if (result == true && routeNameController.text.trim().isNotEmpty) {
-    await _firebaseService.saveRoute(
-      routeName: routeNameController.text.trim(),
-      origin: _originController.text,
-      destination: _destinationController.text,
-      originDetails: _originDetails!,
-      destinationDetails: _destinationDetails!,
-    );
+      if (result == true && routeNameController.text.trim().isNotEmpty) {
+        await _firebaseService.saveRoute(
+          routeName: routeNameController.text.trim(),
+          origin: _originController.text,
+          destination: _destinationController.text,
+          originDetails: _originDetails!,
+          destinationDetails: _destinationDetails!,
+        );
 
-    await _loadSavedRoutes();
+        await _loadSavedRoutes();
 
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('"${routeNameController.text.trim()}" saved successfully'),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  routeNameController.dispose();
-}
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('"${routeNameController.text.trim()}" saved successfully'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } 
+    } finally {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        routeNameController.dispose();
+      });
+    }
+  } 
 
   @override
   void dispose() {
@@ -875,6 +881,40 @@ class _DirectionsPageState extends State<DirectionsPage> {
       itemCount: _suggestedPlaces.length,
       itemBuilder: (context, index) {
         final place = _suggestedPlaces[index];
+        
+        if (place['isDivider'] == true) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Divider(
+                    color: Colors.grey[400],
+                    thickness: 1,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Text(
+                    'Popular Places',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Divider(
+                    color: Colors.grey[400],
+                    thickness: 1,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        
         final isLandmark = place['isLandmark'] == true;
         
         return Padding(
@@ -900,12 +940,12 @@ class _DirectionsPageState extends State<DirectionsPage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: isLandmark ? Colors.amber[100] : Colors.grey[200],
+                      color: isLandmark ? Colors.amber[100] : Colors.blue[50],
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       isLandmark ? Icons.location_city : Icons.trending_up,
-                      color: isLandmark ? Colors.amber[700] : Colors.grey,
+                      color: isLandmark ? Colors.amber[700] : Colors.blue[700],
                       size: 24,
                     ),
                   ),
@@ -957,51 +997,50 @@ class _DirectionsPageState extends State<DirectionsPage> {
     }
 
     if (_savedRoutes.isEmpty) {
-      Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 32),
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  // navigator push to redirect to saved routes page
-                  _showAddRouteDialog();
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.add_rounded,
-                          color: Colors.blue,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const Text(
-                        'Add new',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+      return Column(
+        children: [
+          GestureDetector(
+            onTap: () {
+              _showAddRouteDialog();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
               ),
-              const SizedBox(height: 50),
-              Column(
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.add_rounded,
+                      color: Colors.blue,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  const Text(
+                    'Add new',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.bookmark_border,
@@ -1018,9 +1057,9 @@ class _DirectionsPageState extends State<DirectionsPage> {
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       );
     }
 
@@ -1028,7 +1067,6 @@ class _DirectionsPageState extends State<DirectionsPage> {
       children: [
         GestureDetector(
           onTap: () {
-            // navigator push to redirect to saved routes page
             _showAddRouteDialog();
           },
           child: Container(
@@ -1064,6 +1102,8 @@ class _DirectionsPageState extends State<DirectionsPage> {
             ),
           ),
         ),
+        
+        const SizedBox(height: 12),
         
         Expanded(
           child: ListView.builder(
@@ -1167,7 +1207,6 @@ class _DirectionsPageState extends State<DirectionsPage> {
         ),
       ],
     );
-
   }
 
 }

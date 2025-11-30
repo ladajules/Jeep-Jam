@@ -8,7 +8,7 @@ import 'package:testing/pages/home_page.dart';
 import 'package:testing/pages/login_register_page.dart';
 import 'package:testing/pages/recent_activity_page.dart';
 import 'package:testing/pages/users_saved_routes.dart';
-import 'package:testing/pages/settings_page.dart';
+import 'package:testing/pages/profile_page.dart';
 import 'package:testing/pages/directions_page.dart';
 import 'package:testing/pages/verify_email.dart';
 import 'package:testing/widgets/auth_gate.dart';
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget{
         '/homepage': (context) => const HomePage(),
         '/directionspage': (context) => const DirectionsPage(),
         '/savedroutespage': (context) => const SavedRoutesPage(),
-        '/settingspage': (context) => const SettingsPage(),
+        '/profilepage': (context) => const ProfilePage(),
         '/activitypage': (context) => const RecentActivityPage(),
         '/forgotpass' : (context) => const ForgotPassword(),
         '/verifyemail' : (context) => const EmailVerificationPage(),
