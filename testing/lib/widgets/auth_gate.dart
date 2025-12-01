@@ -43,18 +43,11 @@ class AuthGate extends StatelessWidget {
             return const EmailVerificationPage();
           }
 
-<<<<<<< HEAD
           // check if user is admin then go to admin page
           return FutureBuilder<bool>(
             future: _firebaseService.isUserAdmin(),
             builder: (context, adminSnapshot) {
               if (adminSnapshot.connectionState == ConnectionState.waiting) {
-=======
-          return  FutureBuilder<bool>(
-            future: _getTutorialStatus(),
-            builder: (context, tutorialSnapshot) {
-              if (tutorialSnapshot.connectionState == ConnectionState.waiting){
->>>>>>> 80b93e2cc5d3554ce626d7155d98bb6540659139
                 return const Scaffold(
                   body: Center(child: CircularProgressIndicator(),),
                 );
