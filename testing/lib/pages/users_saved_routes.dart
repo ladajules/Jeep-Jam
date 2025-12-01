@@ -512,15 +512,6 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                   child: Column(
                     children: [
                       // header with the Recent, Suggested, Saved
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            _buildTab('Saved', 2),
-                          ],
-                        ),
-                      ),
                       
                       // scrollable list
                       Expanded(
@@ -542,35 +533,6 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
           nav.navigate(context, index); 
         },
     )
-    );
-  }
-
-  Widget _buildTab(String title, int index) {
-    final isSelected = _selectedTab == index;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTab = index;
-        });
-      },
-
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.withValues(alpha: 0.8) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
-
-        child: Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey[600],
-            fontWeight: FontWeight.bold,
-            fontSize: 14, 
-          ),
-        ),
-      ),
     );
   }
 

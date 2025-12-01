@@ -343,6 +343,18 @@ class FirebaseService {
         'count': 0,
         'isLandmark': true,
       },
+      {
+        'id': 'chonghua',
+        'location': 'Chong Hua Hospital',
+        'count': 0,
+        'isLandmark': true,
+      },
+      {
+        'id': 'carbon',
+        'location': 'Carbon Market',
+        'count': 0,
+        'isLandmark': true,
+      },
     ];
   }
 

@@ -43,8 +43,8 @@ class _JeepJamBottomNavbarState extends State<JeepJamBottomNavbar> {
             selectedColor: Colors.blue,
           ),
           SalomonBottomBarItem(
-            icon: const Icon(Icons.settings),
-            title: const Text("Settings"),
+            icon: const Icon(Icons.person),
+            title: const Text("Account"),
             selectedColor: Colors.teal,
           ),
         ],

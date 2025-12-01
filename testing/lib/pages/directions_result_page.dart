@@ -50,6 +50,16 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
     _checkIfRouteSaved();
   }
 
+  void _updateSheetPosition() {
+    if (_scrollController.isAttached) {
+      if (mounted) { 
+        setState(() {
+          _sheetPosition = _scrollController.size;
+        });
+      }
+    }
+  }
+
   Future<void> _checkIfRouteSaved() async {
     try {
       final savedRoutes = await _firebaseService.getSavedRoutes();
@@ -63,6 +73,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
         orElse: () => {},
       );
       
+      if (!mounted) return;
       setState(() {
         _isRouteSaved = savedRoute.isNotEmpty;
         _savedRouteId = savedRoute.isNotEmpty ? savedRoute['id'] : null;
@@ -112,6 +123,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
       destinationDetails: widget.destinationDetails,
     );
 
+    if (!mounted) return;
     setState(() => _isLoading = false);
   }
 
@@ -147,6 +159,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
     // origin marker
     final blueGpsIcon = await _bitmapFromIcon(Icons.circle);
 
+    if (!mounted) return;
     _markers.add(
       Marker(
         markerId: MarkerId('origin'),
@@ -190,6 +203,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
         destName: widget.destinationDetails['name'],
       );
 
+      if (!mounted) return;
       setState(() {
         _availableRoutes = routes;
       });
@@ -213,6 +227,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
 
     final blueGpsIcon = await _bitmapFromIcon(Icons.circle);
 
+    if (!mounted) return;
     _markers.add(
       Marker(
         markerId: const MarkerId('origin'),
@@ -339,13 +354,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
 
   void _setupScrollListener() {
     // listen if naay position changes sa draggable sheet
-    _scrollController.addListener(() {
-      if (_scrollController.isAttached) {
-        setState(() {
-          _sheetPosition = _scrollController.size;
-        });
-      }
-    });
+    _scrollController.addListener(_updateSheetPosition);
   }
 
   double _calculateButtonPosition() {
@@ -360,207 +369,240 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
     }
   }
 
-  Future<void> _showAddRouteDialog(String origin, String dest) async {
-    if (_isRouteSaved) {
-      final result = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Remove saved route', style: TextStyle(fontWeight: FontWeight.bold)),
+  Future<void> _showSaveRouteDialog() async {
+    final TextEditingController routeNameController = TextEditingController();
+    
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Save Route'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Are you sure you want to remove this route?',
-                style: TextStyle(fontSize: 14),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.8),
+                      shape: BoxShape.circle,
+                    ),
+                      
+                    child: Icon(
+                      Icons.circle,
+                      color: Colors.white,
+                      size: 6,
+                    ),
+                  ),
+                  const SizedBox(width: 6,),
+                  Text(
+                    'From: ${widget.originDetails['name']}',
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                      
+                    child: Icon(
+                      Icons.circle,
+                      color: Colors.white,
+                      size: 6,
+                    ),
+                  ),
+                  const SizedBox(width: 6,),
+                  Text(
+                    'To: ${widget.destinationDetails['name']}',
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
+              TextField(
+                controller: routeNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Route Name',
+                  hintText: 'e.g., Home to Work',
+                  border: OutlineInputBorder(),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.circle, size: 12, color: Colors.blue[700]),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            origin,
-                            style: const TextStyle(fontSize: 12),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.circle, size: 12, color: Colors.red),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            dest,
-                            style: const TextStyle(fontSize: 12),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                autofocus: true,
               ),
             ],
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(context),
               child: const Text('Cancel'),
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
+            ElevatedButton(
+              onPressed: () async {
+                final routeName = routeNameController.text.trim();
+                if (routeName.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter a route name'), backgroundColor: Colors.red,),
+                  );
+                  return;
+                }
+
+                try {
+                  await _firebaseService.saveRoute(
+                    routeName: routeName,
+                    origin: widget.originDetails['name'],
+                    destination: widget.destinationDetails['name'],
+                    originDetails: widget.originDetails,
+                    destinationDetails: widget.destinationDetails,
+                    jeepneyCode: _selectedRoute?.code,
+                  );
+
+                  if (!mounted) return;
+                  
+                  Navigator.pop(context);
+                  
+                  setState(() {
+                    _isRouteSaved = true;
+                  });
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Route "$routeName" saved successfully'), backgroundColor: Colors.green,),
+                  );
+
+                  await _checkIfRouteSaved();
+                } catch (e) {
+                  logger.e('Error saving route: $e');
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to save route')),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
               ),
-              child: const Text('Remove'),
+              child: const Text('Save',),
             ),
           ],
-        ),
-      );
+        );
+      },
+    );
+  }
 
-      if (result == true && _savedRouteId != null) {
-        await _firebaseService.deleteSavedRoute(_savedRouteId!);
-        
-        setState(() {
-          _isRouteSaved = false;
-          _savedRouteId = null;
-        });
-      
-      }
-      return;
-    }
-
-    final TextEditingController routeNameController = TextEditingController();
-
-    final result = await showDialog<bool>(
+  Future<void> _showDeleteRouteDialog() async {
+    return showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Save Current Route'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Give this route a name:',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[700],
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Route', style: TextStyle(fontWeight: FontWeight.bold),),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Are you sure you want to delete this saved route?',
+                style: TextStyle(fontSize: 16),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: routeNameController,
-              decoration: InputDecoration(
-                hintText: 'e.g., Home to Work',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.8),
+                      shape: BoxShape.circle,
+                    ),
+                      
+                    child: Icon(
+                      Icons.circle,
+                      color: Colors.white,
+                      size: 6,
+                    ),
+                  ),
+                  const SizedBox(width: 6,),
+                  Text(
+                    'From: ${widget.originDetails['name']}',
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
               ),
-              autofocus: true,
-            ),
-            const SizedBox(height: 16),
-            if (origin.isNotEmpty && dest.isNotEmpty) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.circle, size: 12, color: Colors.blue[700]),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            origin,
-                            style: const TextStyle(fontSize: 12),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.circle, size: 12, color: Colors.red),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            dest,
-                            style: const TextStyle(fontSize: 12),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                      
+                    child: Icon(
+                      Icons.circle,
+                      color: Colors.white,
+                      size: 6,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 6,),
+                  Text(
+                    'To: ${widget.destinationDetails['name']}',
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
               ),
             ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (_savedRouteId == null) {
+                  Navigator.pop(context);
+                  return;
+                }
+
+                try {
+                  await _firebaseService.deleteSavedRoute(_savedRouteId!);
+
+                  if (!mounted) return;
+                  
+                  Navigator.pop(context);
+                  
+                  setState(() {
+                    _isRouteSaved = false;
+                    _savedRouteId = null;
+                  });
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Route deleted successfully'), backgroundColor: Colors.green,),
+                  );
+                } catch (e) {
+                  logger.e('Error deleting route: $e');
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to delete route'), backgroundColor: Colors.red,),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Delete'),
+            ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (routeNameController.text.trim().isEmpty) {
-                Navigator.pop(context, false);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please enter a route name'),
-                    backgroundColor: Colors.red,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-                return;
-              }
-              
-              Navigator.pop(context, true);
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+        );
+      },
     );
-
-    if (result == true && routeNameController.text.trim().isNotEmpty) {
-      await _firebaseService.saveRoute(
-        routeName: routeNameController.text.trim(),
-        origin: origin,
-        destination: dest,
-        originDetails: widget.originDetails,
-        destinationDetails: widget.destinationDetails,
-      );
-
-      await _checkIfRouteSaved();
-    }
-
-    routeNameController.dispose();
   }
 
   @override
@@ -810,7 +852,12 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
                     GestureDetector(
                       onTap: () {
                         // pop up dialog
-                        _showAddRouteDialog(widget.originDetails['name'], widget.destinationDetails['name']);
+                        if (_isRouteSaved) {
+                          _showDeleteRouteDialog();
+                        } else {
+                          _showSaveRouteDialog();
+                        }
+
                       },
                       child: Container(
                         padding: const EdgeInsets.all(8),
@@ -1065,6 +1112,7 @@ class _DirectionsResultPageState extends State<DirectionsResultPage> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_updateSheetPosition);
     _scrollController.dispose();
     _mapController?.dispose();
     super.dispose();

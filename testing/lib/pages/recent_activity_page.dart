@@ -139,53 +139,42 @@ class _RecentActivityPageState extends State<RecentActivityPage> {
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w500,
-            fontSize: 28,
+            fontSize: 26,
           ),
         ),
         centerTitle: true,
       ),
 
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // input boxes and the submit button area
-              
-              const SizedBox(height: 15),
-
-              // scrollabe list view 
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      // header with the Recent, Suggested, Saved
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            _buildTab('Recent', 0),
-                          ],
-                        ),
-                      ),
-                      
-                      // scrollable list
-                      Expanded(
-                        child: _buildTabContent(),
-                      ),
-                    ],
-                  ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // input boxes and the submit button area
+            
+            const SizedBox(height: 25),
+      
+            // scrollabe list view 
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    // header with the Recent, Suggested, Saved
+                    
+                    // scrollable list
+                    Expanded(
+                      child: _buildTabContent(),
+                    ),
+                  ],
                 ),
               ),
-
-            ],
-          ),
+            ),
+      
+          ],
         ),
       ),
       bottomNavigationBar: JeepJamBottomNavbar(
@@ -194,35 +183,6 @@ class _RecentActivityPageState extends State<RecentActivityPage> {
           setState(() => currentIndex = index);
           nav.navigate(context, index); 
         },
-      ),
-    );
-  }
-
-  Widget _buildTab(String title, int index) {
-    final isSelected = _selectedTab == index;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTab = index;
-        });
-      },
-
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.withValues(alpha: 0.8) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
-
-        child: Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey[600],
-            fontWeight: FontWeight.bold,
-            fontSize: 14, 
-          ),
-        ),
       ),
     );
   }
@@ -265,87 +225,90 @@ class _RecentActivityPageState extends State<RecentActivityPage> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      itemCount: _recentSearches.length,
-      itemBuilder: (context, index) {
-        final search = _recentSearches[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: GestureDetector(
-            onTap: () => _selectRecentSearch(search),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.2),
-                    spreadRadius: 1,
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      shape: BoxShape.circle,
+    return RefreshIndicator(
+      onRefresh: _loadRecentSearches,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        itemCount: _recentSearches.length,
+        itemBuilder: (context, index) {
+          final search = _recentSearches[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: GestureDetector(
+              onTap: () => _selectRecentSearch(search),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withValues(alpha: 0.2),
+                      spreadRadius: 1,
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
                     ),
-                    child: const Icon(
-                      Icons.history_rounded,
-                      color: Colors.grey,
-                      size: 24,
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.history_rounded,
+                        color: Colors.grey,
+                        size: 24,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          search['origin'],
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.black,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const Icon(Icons.arrow_forward, size: 12, color: Colors.grey),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                search['destination'],
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey[600],
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                    const SizedBox(width: 16),
+                    
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            search['origin'],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black,
                             ),
-                          ],
-                        ),
-                      ],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(Icons.arrow_forward, size: 12, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  search['destination'],
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey[600],
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  
-                ],
+                    
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
