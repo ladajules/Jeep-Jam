@@ -96,6 +96,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
     }
   }
 
+
   @override
   Widget build(BuildContext context){
     return Scaffold(
@@ -110,7 +111,8 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
               children: [
                 const Text('Jeep Jam', 
                 style: TextStyle(
-
+                  fontSize: 27,
+                  fontWeight: FontWeight.bold
                 ),
                 textAlign: TextAlign.center,),
 
@@ -118,7 +120,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
 
                 Text(
                   _isLogin ? 'Welcome Back!' : 'Create an account',
-                  style: TextStyle(),
+                  style: TextStyle(fontSize: 20),
                   textAlign: TextAlign.center,
                 ),
 

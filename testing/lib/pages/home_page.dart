@@ -1,3 +1,4 @@
+// import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -6,6 +7,10 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' hide Marker;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
+import 'package:testing/services/firebase_service.dart';
+import 'package:testing/utils/build_divider.dart';
+import 'package:testing/widgets/show_center_modal_learn.dart';
+import 'package:testing/widgets/show_center_modal_read.dart';
 
 // useful shizzles
 import '../services/location.dart';
@@ -16,6 +21,7 @@ import '../utils/weather_utils.dart';
 import '../widgets/weather_screen.dart';
 import '../widgets/sticky_header_delegate.dart';
 import '../widgets/bottom_nav_bar.dart';
+import '../utils/place_card_utils.dart';
 
 
 class HomePage extends StatefulWidget /*with AutomaticKeepAliveClientMixin*/ {
@@ -35,6 +41,9 @@ class _HomePageState extends State<HomePage> {
   final MapManager _mapManager = MapManager();
   final NavigationManager nav = NavigationManager();
   final logger = Logger(); // e = error; i = info msg; w = warning msg; d = debug msg
+  final FirebaseService _firebaseService = FirebaseService();
+  bool _isLoadingSuggested = false;
+  List<Map<String, dynamic>> _suggestedPlaces = [];
 
   Position? _currentPosition;
   Placemark? _currentAddress;
@@ -55,6 +64,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _initializeServices();
     _setupScrollListener();
+    _loadSuggestedPlaces();
   }
 
   void _initializeServices() {
@@ -74,6 +84,15 @@ class _HomePageState extends State<HomePage> {
           _sheetPosition = _scrollController.size;
         });
       }
+    });
+  }
+    Future<void> _loadSuggestedPlaces() async {
+    setState(() => _isLoadingSuggested = true);
+    final places = await _firebaseService.getSuggestedPlaces();
+
+    setState(() {
+      _suggestedPlaces = places;
+      _isLoadingSuggested = false;
     });
   }
 
@@ -438,23 +457,121 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(height: 16),
-          
-          ...List.generate(
-            15,
-            (index) => Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: Container(
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.grey,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Text('Item ${index + 1}'),
+
+
+        // popular places / suggested places section)
+        const Text(
+          "Suggested Places",
+          style: TextStyle(
+            fontSize: 21,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        _isLoadingSuggested
+          ? const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          : _suggestedPlaces.isEmpty
+          ? Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(
+                child: Text(
+                  'No suggested places available',
+                  style: TextStyle(color: Colors.black54),
                 ),
               ),
+            )
+          : Column(
+              children: _suggestedPlaces.map((place) {
+                // Check if it's a divider
+                if (place['isDivider'] == true) {
+                  return buildDivider(place['location']);
+                }
+                // Otherwise it's a regular place
+                return buildPlaceCard(place);
+              }).toList(),
             ),
-          ),
+          
+          //how to read jeep
+            GestureDetector(
+                onTap: () => showCenterModalHowToRead(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue,
+                        spreadRadius: 1,
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  ),
+                    child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.read_more, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text(
+                        'How to read Jeepney Codes',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      ],
+                    )
+                  ),
+                ),
+
+            const SizedBox(height: 16),
+                //learn more about jeep jam
+                 //how to read jeep
+            GestureDetector(
+                onTap: () => showCenterModalHowToLearn(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue,
+                        spreadRadius: 1,
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  ),
+                    child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.read_more, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text(
+                        'Learn More About Jeep Jam',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      ],
+                    )
+                  ),
+                ),
         ]),
       ),
     );
@@ -465,4 +582,9 @@ class _HomePageState extends State<HomePage> {
     _scrollController.dispose();
     super.dispose();
   }
+
+
 }
+
+
+

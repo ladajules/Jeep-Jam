@@ -34,6 +34,8 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => _isLoading = true);
     
     try {
+      await _auth.syncEmailIfChanged();
+      
       final profile = await _firebaseService.getUserProfile();
       final stats = await _firebaseService.getUserStatistics();
       
@@ -84,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return _auth.currentUser?.email ?? 'No email';
   }
 
-  Future<void> _showEditEmailDialog() async {
+Future<void> _showEditEmailDialog() async {
     final emailController = TextEditingController(
       text: _auth.currentUser?.email ?? '',
     );
@@ -134,6 +136,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ElevatedButton(
             onPressed: () {
               if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+                // Show local validation error if fields are empty
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Please fill in all fields')),
                 );
@@ -151,33 +154,52 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     if (result != null) {
+      final String? currentEmail = _auth.currentUser?.email;
+      if (currentEmail == null) {
+         if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User email not found. Please log in again.')),
+          );
+        }
+        return;
+      }
+      
       try {
-        await _auth.signInWithEmailAndPassword(
-          email: _auth.currentUser?.email ?? '',
-          password: result['password']!,
+        // Use the centralized service method: changeEmailLink
+        await _auth.changeEmailLink(
+          currentEmail: currentEmail, // Current user's email
+          newEmail: result['email']!, // The new email from the dialog
+          password: result['password']!, // The current password for re-authentication
         );
-
-        await _auth.currentUser?.verifyBeforeUpdateEmail(result['email']!);
         
+        // Success feedback
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Verification email sent to your new email address. Please verify to complete the change.'),
-              duration: Duration(seconds: 5),
+            SnackBar(
+              content: Text('Verification email sent to ${result['email']!}. Please verify to complete the change.'),
+              duration: const Duration(seconds: 5),
             ),
           );
         }
         
-        await _loadUserData();
+        // Optional: Reload user data in the profile page
+        // The email in Firebase Auth only changes AFTER the user clicks the link, 
+        // but reloading might update other profile data.
+        await _loadUserData(); 
+        
       } catch (e) {
         if (mounted) {
-          String errorMessage = 'Error updating email';
+          // Firebase error handling using the rethrow from your Auth class
+          String errorMessage = 'Error updating email. Please check your password.';
+          
           if (e.toString().contains('wrong-password')) {
-            errorMessage = 'Incorrect password';
+            errorMessage = 'Incorrect password provided.';
           } else if (e.toString().contains('invalid-email')) {
-            errorMessage = 'Invalid email address';
+            errorMessage = 'Invalid email address provided for the new email.';
           } else if (e.toString().contains('email-already-in-use')) {
-            errorMessage = 'Email already in use';
+            errorMessage = 'The new email is already associated with another account.';
+          } else if (e.toString().contains('requires-recent-login')) {
+            errorMessage = 'Re-login required. Please sign out and sign in again.';
           }
           
           ScaffoldMessenger.of(context).showSnackBar(
