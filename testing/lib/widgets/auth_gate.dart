@@ -44,6 +44,7 @@ class AuthGate extends StatelessWidget {
           if (!user.emailVerified){
             return const EmailVerificationPage();
           }
+
           return  FutureBuilder<bool>(
             future: _getTutorialStatus(),
             builder: (context, tutorialSnapshot) {
