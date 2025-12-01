@@ -1,6 +1,3 @@
-
-
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +6,8 @@ import 'package:testing/pages/introduction_page.dart';
 import 'package:testing/pages/login_register_page.dart';
 import 'package:testing/pages/verify_email.dart';
 import 'package:testing/services/auth.dart';
+import 'package:testing/services/firebase_service.dart';
+import '../pages/admin_page.dart';
 
 const String kSeenTutorialKey = 'SeenTutorial';
 
@@ -20,11 +19,10 @@ Future<bool> _getTutorialStatus() async{
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
-
-
   @override
   Widget build(BuildContext context) {
     final Auth auth = Auth();
+    final FirebaseService _firebaseService = FirebaseService();
 
     return StreamBuilder(
       stream: auth.authStateChanges, 
@@ -44,29 +42,48 @@ class AuthGate extends StatelessWidget {
           if (!user.emailVerified){
             return const EmailVerificationPage();
           }
-          return  FutureBuilder<bool>(
-            future: _getTutorialStatus(),
-            builder: (context, tutorialSnapshot) {
-              if (tutorialSnapshot.connectionState == ConnectionState.waiting){
+
+          // check if user is admin then go to admin page
+          return FutureBuilder<bool>(
+            future: _firebaseService.isUserAdmin(),
+            builder: (context, adminSnapshot) {
+              if (adminSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
+                  body: Center(child: CircularProgressIndicator(),),
                 );
               }
 
-              final hasSeenTutorial = tutorialSnapshot.data ?? false;
+              final isAdmin = adminSnapshot.data ?? false;
 
-              if (hasSeenTutorial){
-                return const HomePage();
-              } else {
-                return const OnboardingPage1();
+              if (isAdmin) {
+                return const AdminPage();
               }
-            }
+
+              // else if user, check tutorial status
+              return FutureBuilder<bool>(
+                future: _getTutorialStatus(),
+                builder: (context, tutorialSnapshot) {
+                  if (tutorialSnapshot.connectionState == ConnectionState.waiting){
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  final hasSeenTutorial = tutorialSnapshot.data ?? false;
+
+                  if (hasSeenTutorial){
+                    return const HomePage();
+                  } else {
+                    return const OnboardingPage1();
+                  }
+                },
+              );
+            },
           );
         }
 
         return const LoginRegisterPage();
       }
-      );
-
+    );
   }
 }
