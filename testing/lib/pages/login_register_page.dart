@@ -133,9 +133,22 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
                   decoration: InputDecoration(
                     labelText: 'Email',
                     prefixIcon: const Icon(Icons.email, color: Color(0xff632d1b)),
-                    border: OutlineInputBorder(
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 1,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
+
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    labelStyle: TextStyle(color: Color(0xFF6e2d1b))
                   ),
                 ),
 
@@ -146,9 +159,23 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
                   decoration: InputDecoration(
                     labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock, color: Color(0xff632d1b)),
-                    border: OutlineInputBorder( 
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 1,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
+
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    labelStyle: TextStyle(color: Color(0xFF6e2d1b))
+
                   ),
                 ),
                 const SizedBox(height: 34),

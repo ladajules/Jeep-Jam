@@ -19,6 +19,7 @@ class UserDetailsDialog extends StatelessWidget {
     final isVerified = user['isVerified'] == true;
 
     return AlertDialog(
+      backgroundColor: Color(0xFFfef1d8),
       title: const Text(
         'User Details',
         style: TextStyle(fontWeight: FontWeight.bold),
@@ -73,6 +74,7 @@ class UserDetailsDialog extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: Color(0xFFfef1d8),
         title: Text(
           isAdmin ? 'Remove Admin Rights?' : 'Grant Admin Rights?',
           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -107,6 +109,7 @@ class UserDetailsDialog extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        backgroundColor: Color(0xFFfef1d8),
         title: const Text(
           'Delete User?',
           style: TextStyle(fontWeight: FontWeight.bold),

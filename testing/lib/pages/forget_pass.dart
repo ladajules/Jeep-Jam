@@ -18,6 +18,14 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   bool _isLoading = false;
 
   Future<void> _sendResetEmail() async {
+    if (_emailController.text.trim().isEmpty) {
+      setState(() {
+        _message = 'Email field is required.';
+        _isSuccess = false;
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _message = null; 
@@ -57,13 +65,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   Widget build (BuildContext context){
     return Scaffold(
+      backgroundColor: Color(0xFFfef1d8),
       body: Padding(
-        padding: EdgeInsets.all(8),
+        padding: EdgeInsets.all(12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Enter email to reset your password',
-            textAlign: TextAlign.center,
+            Text('Enter your email to reset your password',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
             ),
 
             SizedBox(height: 24),
@@ -73,10 +83,23 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 labelText: 'Email',
-                prefixIcon: const Icon(Icons.email),
-                    border: OutlineInputBorder(
+                prefixIcon: Icon(Icons.email, color: Color(0xFF6e2d1b),),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 2,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
+
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    labelStyle: TextStyle(color: Color(0xFF6e2d1b))
               ),
             ),
 
@@ -103,16 +126,19 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               onPressed:  (){
                 _isLoading ? null:  _sendResetEmail();
                 Text('Email has been sent!');
-                
               },
-               child: Text('Send Email')
-               ),
+
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFdea855),
+              ),
+              child: Text('Send Email', style: TextStyle(color: Color(0xFF6e2d1b)),),
+            ),
 
             TextButton(
               onPressed: (){
                 Navigator.pop(context);
               }, 
-              child: Text('Go back to Login'),
+              child: Text('Go back to Login', style: TextStyle(color: Color(0xFF6e2d1b)),),
               )
           ],
         ),

@@ -95,6 +95,7 @@ Future<void> _showEditEmailDialog() async {
     final result = await showDialog<Map<String, String>?>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Color(0xfffef1d8),
         title: const Text('Change Email', style: TextStyle(fontWeight: FontWeight.bold),),
         content: SingleChildScrollView(
           child: Column(
@@ -110,8 +111,22 @@ Future<void> _showEditEmailDialog() async {
                 controller: emailController,
                 decoration: const InputDecoration(
                   labelText: 'New Email',
-                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color(0xFF6e2d1b),
+                      width: 1,
+                    ),
+                  ),
+
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color(0xFF6e2d1b),
+                      width: 2,
+                    ),
+                  ),
+
                   prefixIcon: Icon(Icons.email),
+                  labelStyle: TextStyle(color: Color(0xff6e2d1b))
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -120,8 +135,21 @@ Future<void> _showEditEmailDialog() async {
                 controller: passwordController,
                 decoration: const InputDecoration(
                   labelText: 'Current Password',
-                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color(0xFF6e2d1b),
+                      width: 1,
+                    ),
+                  ),
+
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Color(0xFF6e2d1b),
+                      width: 2,
+                    ),
+                  ),
                   prefixIcon: Icon(Icons.lock),
+                  labelStyle: TextStyle(color: Color(0xff6e2d1b))
                 ),
                 obscureText: true,
               ),
@@ -147,7 +175,10 @@ Future<void> _showEditEmailDialog() async {
                 'password': passwordController.text,
               });
             },
-            child: const Text('Update Email', style: TextStyle(color: Colors.black)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xffdea855)
+            ),
+            child: const Text('Update Email', style: TextStyle(color: Color(0xff6e2d1b))),
           ),
         ],
       ),
@@ -547,6 +578,7 @@ Future<void> _showEditEmailDialog() async {
                               final result = await showDialog<bool>(
                                 context: context,
                                 builder: (context) => AlertDialog(
+                                  backgroundColor: Color(0xfffef1d8),
                                   title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold),),
                                   content: const Text('Are you sure you want to byebye?'),
                                   actions: [
@@ -599,11 +631,11 @@ Future<void> _showEditEmailDialog() async {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Color(0xfffef1d8),
+        color: Color(0xffdea855),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Color(0xff6e2d1b),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -619,7 +651,7 @@ Future<void> _showEditEmailDialog() async {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Colors.black,
               ),
             ),
           ),
@@ -639,7 +671,7 @@ Future<void> _showEditEmailDialog() async {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: Colors.black,
             ),
           ),
           Flexible(

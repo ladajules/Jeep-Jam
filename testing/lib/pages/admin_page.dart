@@ -544,7 +544,7 @@ class _AdminPageState extends State<AdminPage> {
             controller: _userSearchController,
             decoration: InputDecoration(
               hintText: 'Search by email...',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: const Icon(Icons.search, color: Color(0xFF6e2d1b),),
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: Color(0xFF6e2d1b),
@@ -563,6 +563,7 @@ class _AdminPageState extends State<AdminPage> {
 
               filled: true,
               fillColor: Colors.white,
+              hintStyle: TextStyle(color: Color(0xFF6e2d1b))
             ),
           ),
         ),
@@ -600,15 +601,14 @@ class _AdminPageState extends State<AdminPage> {
                         final joinDate = DateFormatter.formatDate(user['createdAt']);
 
                         return Card(
+                          color: Color(0xFFdea855),
                           margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: isAdmin 
-                                  ? Colors.purple.withOpacity(0.1)
-                                  : Colors.blue.withOpacity(0.1),
+                              backgroundColor: Colors.white,
                               child: Icon(
                                 isAdmin ? Icons.admin_panel_settings : Icons.person,
-                                color: isAdmin ? Colors.purple : Colors.blue,
+                                color: isAdmin ? Colors.purple : Color(0xFF6e2d1b),
                               ),
                             ),
                             title: Row(
@@ -671,6 +671,7 @@ class _AdminPageState extends State<AdminPage> {
                                             ? Colors.green 
                                             : Colors.red,
                                         fontSize: 12,
+                                        fontWeight: FontWeight.bold
                                       ),
                                     ),
                                   ],
