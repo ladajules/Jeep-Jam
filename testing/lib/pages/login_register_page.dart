@@ -100,6 +100,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
   @override
   Widget build(BuildContext context){
     return Scaffold(
+      backgroundColor: const Color(0xFFFEF1D8),
       body: SafeArea(
         child:
          Center(
@@ -131,7 +132,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     labelText: 'Email',
-                    prefixIcon: const Icon(Icons.email),
+                    prefixIcon: const Icon(Icons.email, color: Color(0xff632d1b)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -144,8 +145,8 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock),
-                    border: OutlineInputBorder(
+                    prefixIcon: const Icon(Icons.lock, color: Color(0xff632d1b)),
+                    border: OutlineInputBorder( 
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -157,7 +158,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
                   padding: EdgeInsets.all(12),
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.red[50],
+                    color: Color(0xfffef1d8),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.red[300]!),
                   ),
@@ -171,6 +172,10 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleAuth,
                   style: ElevatedButton.styleFrom(
+
+                    backgroundColor: const Color(0xFF6E2D1B), // Your custom brown color
+    
+    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -180,14 +185,14 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
                     const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xff6e2d1b),),
 
                     )
 
                     : 
                     Text(
                       _isLogin ? 'Login' : 'Register',
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
                 
@@ -202,6 +207,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
                     }, 
                     child: Text(
                       _isLogin ? "Dont't have an account? Register" : 'Already have an account? Login',
+                      style: TextStyle(color: Color(0xff6e2d1b)),
                     ),
                     ),
                     
@@ -209,7 +215,8 @@ class _LoginRegisterPageState extends State<LoginRegisterPage>{
                     onPressed:() {
                       Navigator.pushNamed(context, '/forgotpass');
                     },
-                    child: Text('Forgot your password? Click here'),
+                    child: Text('Forgot your password? Click here', style: TextStyle(color: Color(0xff6e2d1b)),),
+                    
 
                   )
 

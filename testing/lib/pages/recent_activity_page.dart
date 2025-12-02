@@ -129,9 +129,9 @@ class _RecentActivityPageState extends State<RecentActivityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xfffef1d8),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor:Color(0xfffef1d8),
         elevation: 0,
         
         title: const Text(
@@ -158,7 +158,7 @@ class _RecentActivityPageState extends State<RecentActivityPage> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Color(0xfffef1d8),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -239,11 +239,11 @@ class _RecentActivityPageState extends State<RecentActivityPage> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Color(0xffdea855),
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withValues(alpha: 0.2),
+                      color: const Color(0xff6e2d1b),
                       spreadRadius: 1,
                       blurRadius: 4,
                       offset: const Offset(0, 2),
@@ -260,7 +260,7 @@ class _RecentActivityPageState extends State<RecentActivityPage> {
                       ),
                       child: const Icon(
                         Icons.history_rounded,
-                        color: Colors.grey,
+                        color: Color(0xff6e2d1b),
                         size: 24,
                       ),
                     ),
@@ -283,14 +283,14 @@ class _RecentActivityPageState extends State<RecentActivityPage> {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              const Icon(Icons.arrow_forward, size: 12, color: Colors.grey),
+                              const Icon(Icons.arrow_forward, size: 12, color: Color(0xff6e2d1b)),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
                                   search['destination'],
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.grey[600],
+                                    color: Color(0xff6e2d1b),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

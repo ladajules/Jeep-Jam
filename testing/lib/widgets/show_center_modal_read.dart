@@ -13,8 +13,10 @@ void showCenterModalHowToRead(BuildContext context) {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Color(0xFFFEF1D8),
               borderRadius: BorderRadius.circular(20),
+
+              border: Border.all(color: Colors.brown, width : 3.0,)
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -35,12 +37,12 @@ void showCenterModalHowToRead(BuildContext context) {
                       ),
                     ),
                     const SizedBox(width: 8), 
-                    IconButton(
-                      padding: EdgeInsets.zero, 
-                      constraints: const BoxConstraints(), 
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+                    // IconButton(
+                    //   padding: EdgeInsets.zero, 
+                    //   constraints: const BoxConstraints(), 
+                    //   icon: const Icon(Icons.close),
+                    //   onPressed: () => Navigator.pop(context),
+                    // ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -56,7 +58,7 @@ void showCenterModalHowToRead(BuildContext context) {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.blueAccent,
+                    color: Color(0xFF6E2D1B),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -113,7 +115,7 @@ void showCenterModalHowToRead(BuildContext context) {
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: Color(0xFF6E2D1B),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),

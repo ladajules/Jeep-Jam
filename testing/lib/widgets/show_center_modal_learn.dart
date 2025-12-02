@@ -1,60 +1,73 @@
 import 'package:flutter/material.dart';
 
-void _showAboutJeepJam(BuildContext context) {
-  showDialog(
+Future<dynamic>_showAboutJeepJam(BuildContext context) {
+ return showDialog(
     context: context,
     builder: (BuildContext context) {
+    
+      final double screenHeight = MediaQuery.of(context).size.height;
+
       return Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Expanded(
-                    child: Text(
-                      'About Jeep Jam',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+        child: ConstrainedBox(
+          
+          constraints: BoxConstraints(
+            maxHeight: screenHeight * 0.8,
+          ),
+          child: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                 color: const Color(0xFFFEF1D8),
+                borderRadius: BorderRadius.circular(20),
 
-                const Text(
-                  'Jeep Jam addresses the common problem that many commuters in Cebu are unfamiliar with specific jeepney routes. This often results in commuters having to ask the driver or conductor if their destination is en route. The app aims to solve this by unifying and documenting jeepney routes to help you Travel with Confidence.',
-                  style: TextStyle(fontSize: 16, height: 1.5),
-                ),
-                const SizedBox(height: 20),
+                border: Border.all(color: Colors.brown, width : 3.0,)
+
                 
-                const Text(
-                  'Who Benefits from Jeep Jam?',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'About Jeep Jam',
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
 
-                // Benefits List
-                _buildBenefitSection('Students', 'Allows young commuters to readily check jeepney routes and codes that will take them to and from school, leveraging the ubiquity of the smartphone.'),
-                const SizedBox(height: 15),
-                _buildBenefitSection('Young Workforce', 'Assists those entering the workforce in navigating unfamiliar routes to institutions of higher education or their workplace.'),
-                const SizedBox(height: 15),
-                _buildBenefitSection('Tourists', 'Provides prompt, focused, and accessible services to visitors in Cebu who are less likely to be familiar with the public transportation routes and codes due to a lack of documentation.'),
-              ],
+                  const Text(
+                    'Jeep Jam addresses the common problem that many commuters in Cebu are unfamiliar with specific jeepney routes. This often results in commuters having to ask the driver or conductor if their destination is en route. The app aims to solve this by unifying and documenting jeepney routes to help you Travel with Confidence.',
+                    style: TextStyle(fontSize: 16, height: 1.5),
+                  ),
+                  const SizedBox(height: 20),
+
+                  const Text(
+                    'Who Benefits from Jeep Jam?',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Benefits List
+                  _buildBenefitSection('Students', 'Allows young commuters to readily check jeepney routes and codes that will take them to and from school, leveraging the ubiquity of the smartphone.'),
+                  const SizedBox(height: 15),
+                  _buildBenefitSection('Young Workforce', 'Assists those entering the workforce in navigating unfamiliar routes to institutions of higher education or their workplace.'),
+                  const SizedBox(height: 15),
+                  _buildBenefitSection('Tourists', 'Provides prompt, focused, and accessible services to visitors in Cebu who are less likely to be familiar with the public transportation routes and codes due to a lack of documentation.'),
+                ],
+              ),
             ),
           ),
         ),
@@ -63,50 +76,62 @@ void _showAboutJeepJam(BuildContext context) {
   );
 }
 
-void _showMeetDevelopers(BuildContext context) {
-  showDialog(
+Future<dynamic>_showMeetDevelopers(BuildContext context) {
+  return showDialog(
     context: context,
     builder: (BuildContext context) {
+      // 1. Get screen height
+      final double screenHeight = MediaQuery.of(context).size.height;
+
       return Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Meet JeepJam's Developers",
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+        child: ConstrainedBox(
+          // 2. Apply height constraint
+          constraints: BoxConstraints(
+            maxHeight: screenHeight * 0.8,
+          ),
+          child: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF1D8),
+                borderRadius: BorderRadius.circular(20),
 
-                // Developer 1
-                _buildDeveloperSection('Jules Lada', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.'),
-                const SizedBox(height: 20),
-                
-                // Developer 2
-                _buildDeveloperSection('Gaea Mutia', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.'),
-                const SizedBox(height: 20),
+                border: Border.all(color: Colors.brown, width: 3.0,),
+              ),
+              
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "JeepJam's Developers",
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
 
-                // Developer 3
-                _buildDeveloperSection('Althea Telmo', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.'),
-              ],
+                  // Developer 1
+                  _buildDeveloperSection('Jules Lada', 'A 2nd year IT student from the University of San Carlos.'),
+                  const SizedBox(height: 20),
+
+                  // Developer 2
+                  _buildDeveloperSection('Gaea Mutia', 'A 2nd year IT student from the University of San Carlos.'),
+                  const SizedBox(height: 20),
+
+                  // Developer 3
+                  _buildDeveloperSection('Althea Telmo', 'A 2nd year IT student from the University of San Carlos.'),
+                ],
+              ),
             ),
           ),
         ),
@@ -122,7 +147,7 @@ Widget _buildDeveloperSection(String name, String description) {
     children: [
       Text(
         name,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.brown),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF6E2D1B),),
       ),
       const SizedBox(height: 4),
       Text(description, style: const TextStyle(fontSize: 14, height: 1.4)),
@@ -137,7 +162,7 @@ Widget _buildBenefitSection(String title, String description) {
     children: [
       Text(
         title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.red),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF6E2D1B),),
       ),
       const SizedBox(height: 4),
       Text(description, style: const TextStyle(fontSize: 14, height: 1.4)),
@@ -156,7 +181,7 @@ void showCenterModalHowToLearn(BuildContext context) {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFFFEF1D8), // Beige Background
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
@@ -171,7 +196,7 @@ void showCenterModalHowToLearn(BuildContext context) {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.brown, // Match style from slide
+                      color: Color(0xFF6E2D1B), 
                     ),
                   ),
                   IconButton(
@@ -180,17 +205,18 @@ void showCenterModalHowToLearn(BuildContext context) {
                   ),
                 ],
               ),
-              const SizedBox(height: 40), // Increased spacing for visual separation
+              const SizedBox(height: 40), 
 
               // Icon Grid/Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  // Option 1: JeepJam Info (Triggers Sub-Modal 1)
+                  // Option 1: JeepJam Info
                   GestureDetector(
                     onTap: () {
-                      Navigator.pop(context); // Close the current modal first
-                      _showAboutJeepJam(context); // Then show the new modal
+                      // LOGIC CHANGE: We DO NOT close this modal.
+                      // We just open the next one on top of it.
+                      _showAboutJeepJam(context); 
                     },
                     child: const Column(
                       children: [
@@ -201,29 +227,30 @@ void showCenterModalHowToLearn(BuildContext context) {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.brown,
+                            color: Color(0xFF6E2D1B),
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  // Option 2: Developers Info (Triggers Sub-Modal 2)
+                  // Option 2: Developers Info
                   GestureDetector(
                     onTap: () {
-                      Navigator.pop(context); // Close the current modal first
-                      _showMeetDevelopers(context); // Then show the new modal
+                      // LOGIC CHANGE: We DO NOT close this modal.
+                      // We just open the next one on top of it.
+                      _showMeetDevelopers(context);
                     },
                     child: const Column(
                       children: [
-                        Icon(Icons.people_alt, size: 80, color: Colors.black), // Replaced icon with standard Flutter icon
+                        Icon(Icons.people_alt, size: 80, color: Colors.black), 
                         SizedBox(height: 10),
                         Text(
                           'Developers',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.brown,
+                            color: Color(0xFF6E2D1B),
                           ),
                         ),
                       ],
@@ -231,7 +258,7 @@ void showCenterModalHowToLearn(BuildContext context) {
                   ),
                 ],
               ),
-              const SizedBox(height: 20), // Padding at the bottom
+              const SizedBox(height: 20),
             ],
           ),
         ),

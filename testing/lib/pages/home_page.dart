@@ -195,7 +195,7 @@ class _HomePageState extends State<HomePage> {
         heightFactor: 0.4,
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Color(0xfffef1d8),
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
             BoxShadow(
@@ -256,7 +256,7 @@ class _HomePageState extends State<HomePage> {
                   elevation: 4,
                   child: const Icon(
                     Icons.my_location,
-                    color: Colors.blue,
+                    color: Color(0xFF632D1B),
                     size: 30,
                   ),
                 ),
@@ -272,7 +272,7 @@ class _HomePageState extends State<HomePage> {
                   elevation: 4,
                   child: const Icon(
                     Icons.directions,
-                    color: Colors.blue,
+                    color: Color(0xFF632D1B),
                     size: 30,
                   ),
                 ),
@@ -304,7 +304,7 @@ class _HomePageState extends State<HomePage> {
       builder: (BuildContext context, ScrollController scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Color(0xFFFEF1D8),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -337,7 +337,7 @@ class _HomePageState extends State<HomePage> {
         minHeight: 100,
         maxHeight: 100,
         child: Container(
-          color: Colors.white,
+          color: Color(0xffdea855),
           child: Column(
             children: [
               Center(
@@ -346,7 +346,7 @@ class _HomePageState extends State<HomePage> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey,
+                    color: Color.fromARGB(255, 235, 206, 152),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -362,7 +362,7 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Color(0xff6e2d1b),
                       ),
                     ),
                     _buildWeatherWidget(),
@@ -382,7 +382,7 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: const Color.fromARGB(48, 192, 191, 191),
+          color: const Color.fromARGB(47, 196, 142, 142),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Row(
@@ -414,51 +414,51 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildScrollableContent() {
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 50.0),
       sliver: SliverList(
         delegate: SliverChildListDelegate([
           const Center(
             child: Text(
-              'Your Location',
+              'Welcome to Jeep Jam!',
               style: TextStyle(
-                fontSize: 21,
+                fontSize: 27,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          const SizedBox(height: 13),
+          const SizedBox(height: 40),
           
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.grey[400],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  _currentAddress != null
-                      ? '${_currentAddress!.street}, ${_currentAddress!.locality}'
-                      : 'Location off or permission denied',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Colors.black,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _status,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
+          // Container(
+          //   height: 200,
+          //   decoration: BoxDecoration(
+          //     color: Color(0xffdea855),
+          //     borderRadius: BorderRadius.circular(12),
+          //   ),
+          //   child: Column(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: [
+          //       Text(
+          //         _currentAddress != null
+          //             ? '${_currentAddress!.street}, ${_currentAddress!.locality}'
+          //             : 'Location off or permission denied',
+          //         style: const TextStyle(
+          //           fontSize: 15,
+          //           color: Colors.black,
+          //         ),
+          //         textAlign: TextAlign.center,
+          //       ),
+          //       const SizedBox(height: 8),
+          //       Text(
+          //         _status,
+          //         style: const TextStyle(
+          //           fontSize: 15,
+          //           color: Colors.black,
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          // const SizedBox(height: 16),
 
         // popular places / suggested places section)
         const Text(
@@ -479,9 +479,10 @@ class _HomePageState extends State<HomePage> {
             )
           : _suggestedPlaces.isEmpty
           ? Container(
+            color: Color(0xfffef1d8),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: Color(0xfffef1d8),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Center(
@@ -506,11 +507,11 @@ class _HomePageState extends State<HomePage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                   decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: Color(0xFF632D1B),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blue,
+                        color: Color(0xFF632D1B),
                         spreadRadius: 1,
                         blurRadius: 8,
                         offset: const Offset(0, 4),
@@ -543,11 +544,11 @@ class _HomePageState extends State<HomePage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                   decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: Color(0xFF632D1B),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blue,
+                        color: Color(0xFF632D1B),
                         spreadRadius: 1,
                         blurRadius: 8,
                         offset: const Offset(0, 4),
