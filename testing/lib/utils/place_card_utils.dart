@@ -12,7 +12,7 @@ Widget buildPlaceCard(Map<String, dynamic> place) {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Color(0xffdea855),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey[300]!),
           boxShadow: [
@@ -31,12 +31,12 @@ Widget buildPlaceCard(Map<String, dynamic> place) {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.blue[100],
+                color: Color.fromARGB(87, 110, 45, 27),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.place,
-                color: Colors.blue[700],
+                color: Color(0xff6e2d1b),
                 size: 30,
               ),
             ),
@@ -55,15 +55,6 @@ Widget buildPlaceCard(Map<String, dynamic> place) {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    place['address'] ?? 'No address available',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
                 ],
               ),
             ),
@@ -72,7 +63,7 @@ Widget buildPlaceCard(Map<String, dynamic> place) {
             Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: Colors.grey[400],
+              color: Colors.black,
             ),
           ],
         ),

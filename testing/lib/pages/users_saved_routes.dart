@@ -220,7 +220,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                 'Give this route a name:',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[700],
+                  color: Colors.black,
                 ),
               ),
               const SizedBox(height: 12),
@@ -240,7 +240,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: Colors.black,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
@@ -248,7 +248,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.circle, size: 12, color: Colors.blue[700]),
+                          Icon(Icons.circle, size: 12, color: Color(0xff6e2d1b)),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -381,9 +381,9 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xfffef1d8),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor:Color(0xfffef1d8),
         elevation: 0,
         title: const Text(
           'Saved Routes',
@@ -412,9 +412,9 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                     onTap: _openOriginSearch,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Color(0xfffef1d8),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey[400]!),
+                        border: Border.all(color: Colors.black!),
                       ),
                                     
                       // origin input 
@@ -431,7 +431,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                                 
                               child: Icon(
                                 Icons.circle,
-                                color: Colors.white,
+                                color: Color(0xfffef1d8),
                                 size: 8,
                               ),
                             ),
@@ -442,7 +442,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                                 _originController.text.isEmpty ? 'To where?' : _originController.text,
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: _originController.text.isEmpty ? Colors.grey[500] : Colors.black,
+                                  color: _originController.text.isEmpty ? Colors.black : Colors.black,
                                 ),
                               ),
                             ),
@@ -458,9 +458,9 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                     onTap: _openDestinationSearch,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Color(0xfffef1d8),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey[400]!),
+                        border: Border.all(color: Colors.black),
                       ),
                                     
                       // destination input
@@ -477,7 +477,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                                 
                               child: Icon(
                                 Icons.circle,
-                                color: Colors.white,
+                                color: Color(0xfffef1d8),
                                 size: 8,
                               ),
                             ),
@@ -488,7 +488,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                                 _destinationController.text.isEmpty ? 'To where?' : _destinationController.text,
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: _destinationController.text.isEmpty ? Colors.grey[500] : Colors.black,
+                                  color: _destinationController.text.isEmpty ? Colors.black: Colors.black,
                                 ),
                               ),
                             ),
@@ -506,7 +506,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Color(0xfffef1d8),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -562,7 +562,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Color(0xfffef1d8),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -570,12 +570,12 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: Color(0xff6e2d1b),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.add_rounded,
-                      color: Colors.blue,
+                      color: Colors.white,
                       size: 24,
                     ),
                   ),
@@ -585,7 +585,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
-                      color: Colors.blue,
+                      color: Color(0xff6e2d1b),
                     ),
                   ),
                 ],
@@ -628,7 +628,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Color(0xfffef1d8),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -641,7 +641,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                   ),
                   child: const Icon(
                     Icons.add_rounded,
-                    color: Colors.blue,
+                    color: Color(0xff6e2d1b),
                     size: 24,
                   ),
                 ),
@@ -651,7 +651,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: Colors.blue,
+                    color: Color(0xff6e2d1b),
                   ),
                 ),
               ],
@@ -674,7 +674,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Color(0xfffef1d8),
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
@@ -690,12 +690,12 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.blue[50],
+                            color: Color(0xff6e2d1b),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.bookmark,
-                            color: Colors.blue[700],
+                            color: Color(0xff6e2d1b),
                             size: 24,
                           ),
                         ),
@@ -728,14 +728,14 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue[100],
+                                    color: Color(0xff6e2d1b),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
                                     route['jeepneyCode'].toUpperCase(),
                                     style: TextStyle(
                                       fontSize: 11,
-                                      color: Colors.blue[700],
+                                      color: Color(0xff6e2d1b),
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),

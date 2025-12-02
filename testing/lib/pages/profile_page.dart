@@ -327,10 +327,10 @@ Future<void> _showEditEmailDialog() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Color(0xfffef1d8),
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xfffef1d8),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
       ),
@@ -346,7 +346,7 @@ Future<void> _showEditEmailDialog() async {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Color(0xfffef1d8),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withValues(alpha: 0.1),
@@ -362,10 +362,10 @@ Future<void> _showEditEmailDialog() async {
                             height: 100,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.blue[600],
+                              color: Color(0xff6e2d1b),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.blue.withValues(alpha: 0.3),
+                                  color: Color(0),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),
@@ -377,7 +377,7 @@ Future<void> _showEditEmailDialog() async {
                                 style: const TextStyle(
                                   fontSize: 40,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: Color(0xfffef1d8),
                                 ),
                               ),
                             ),
@@ -599,7 +599,7 @@ Future<void> _showEditEmailDialog() async {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Color(0xfffef1d8),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -671,7 +671,7 @@ Future<void> _showEditEmailDialog() async {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
-            Icon(icon, size: 24, color: Colors.blue[700]),
+            Icon(icon, size: 24, color: Color(0xff6e2d1b)),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
@@ -685,7 +685,7 @@ Future<void> _showEditEmailDialog() async {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Color(0xfffef1d8),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -697,7 +697,7 @@ Future<void> _showEditEmailDialog() async {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: Colors.grey),
+            const Icon(Icons.chevron_right, color: Color(0xff6e2d1b)),
           ],
         ),
       ),
@@ -717,7 +717,7 @@ Future<void> _showEditEmailDialog() async {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
-            Icon(icon, size: 24, color: iconColor ?? Colors.grey[700]),
+            Icon(icon, size: 24, color: iconColor ?? Color(0xff6e2d1b)),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
@@ -730,7 +730,7 @@ Future<void> _showEditEmailDialog() async {
               ),
             ),
             if (titleColor == null)
-              const Icon(Icons.chevron_right, color: Colors.grey),
+              const Icon(Icons.chevron_right, color: Color(0xff6e2d1b)),
           ],
         ),
       ),

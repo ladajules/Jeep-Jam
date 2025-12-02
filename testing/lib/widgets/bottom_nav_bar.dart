@@ -20,32 +20,33 @@ class _JeepJamBottomNavbarState extends State<JeepJamBottomNavbar> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: Color(0xffde7d4c),
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: SalomonBottomBar(
         currentIndex: widget.currentIndex,
         selectedItemColor: const Color(0xff6200ee),
-        unselectedItemColor: const Color(0xff757575),
+        unselectedItemColor: const Color.fromARGB(255, 255, 255, 255),
         onTap: widget.onTap,
         items: [
           SalomonBottomBarItem(
             icon: const Icon(Icons.home),
             title: const Text("Home"),
-            selectedColor: Colors.purple,
+            selectedColor: Color(0xff6e2d1b),
           ),
           SalomonBottomBarItem(
             icon: const Icon(Icons.assignment_rounded),
             title: const Text("Activity"),
-            selectedColor: Colors.blue,
+            selectedColor: Color(0xff6e2d1b),
           ),
           SalomonBottomBarItem(
             icon: const Icon(Icons.bookmark),
             title: const Text("Saved"),
-            selectedColor: Colors.blue,
+            selectedColor: Color(0xff6e2d1b),
           ),
           SalomonBottomBarItem(
             icon: const Icon(Icons.person),
             title: const Text("Account"),
-            selectedColor: Colors.teal,
+            selectedColor: Color(0xff6e2d1b),
           ),
         ],
       ),

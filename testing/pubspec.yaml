@@ -40,4 +40,5 @@ flutter:
     - assets/
     - assets/tutorial_icons/
     - assets/weather_icons/
-    - .env
+    - .env 
+
