@@ -49,7 +49,6 @@ class _HomePageState extends State<HomePage> {
 
   Position? _currentPosition;
   Placemark? _currentAddress;
-  String _status = "No location yet yo";
 
   Weather? _weather;
 
@@ -122,23 +121,15 @@ class _HomePageState extends State<HomePage> {
 
   //Function for geolocator
   Future<void> _getLocationAndAddress() async {
-    setState(() => _status = "Fetching location...");
 
     final position = await _locationService.getCurrentLocation();
-    if (position == null) {
-      if (mounted){
-      setState(() => _status = "Location permission denied or service off.");
-      }
-      return;
-    }
 
-    final placemark = await _locationService.getAddressFromCoordinates(position);
+    final placemark = await _locationService.getAddressFromCoordinates(position!);
 
     if (mounted){
         setState(() {
           _currentPosition = position;
           _currentAddress = placemark;
-          _status = placemark != null ? "Location fetched successfully!" : "Failed to get address";
         });
     }
 

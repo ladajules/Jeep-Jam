@@ -414,7 +414,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                       decoration: BoxDecoration(
                         color: Color(0xfffef1d8),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.black!),
+                        border: Border.all(color: Colors.black),
                       ),
                                     
                       // origin input 
