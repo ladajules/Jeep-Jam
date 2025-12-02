@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:math' show cos, sin, sqrt, asin, pi;
+import 'dart:math' show cos, sin, sqrt, asin, atan2, pi;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -172,74 +172,6 @@ class JeepneyRouteService {
     return null;
   }
 
-  // Future<List<JeepneyRouteMatch>?> _checkSearchCache(
-  //   double originLat,
-  //   double originLng,
-  //   double destLat,
-  //   double destLng,
-  // ) async {
-  //   try {
-  //     final snapshot = await _firestore.collection('search_cache').get();
-
-  //     for (var doc in snapshot.docs) {
-  //       final data = doc.data();
-        
-  //       if (data['originLat'] != null && data['originLng'] != null &&
-  //         data['destLat'] != null && data['destLng'] != null) {
-
-  //         double cachedOriginLat = data['originLat'].toDouble();
-  //         double cachedOriginLng = data['originLng'].toDouble();
-  //         double cachedDestLat = data['destLat'].toDouble();
-  //         double cachedDestLng = data['destLng'].toDouble();
-
-  //         double originDistance = _calculateDistance(originLat, originLng, cachedOriginLat, cachedOriginLng);
-  //         double destDistance = _calculateDistance(destLat, destLng, cachedDestLat, cachedDestLng);
-
-  //         if (originDistance < 0.1 && destDistance < 0.1) {
-  //           logger.i('Cache hit! Using cached routes');
-            
-  //           List<dynamic> cachedCodes = data['codes'] ?? [];
-  //           List<JeepneyRouteMatch> routes = [];
-
-  //           for (String code in cachedCodes) {
-  //             final routeDoc = await _firestore.collection('jeepney_routes').doc(code).get();
-              
-  //             if (!routeDoc.exists) continue;
-
-  //             final routeData = routeDoc.data()!;
-  //             List<dynamic> stopsData = routeData['route'] ?? [];
-  //             List<String> stopNames = stopsData.cast<String>();
-  //             List<dynamic> coordinatesData = routeData['coordinates'] ?? [];
-
-  //             if (coordinatesData.isEmpty) continue;
-
-  //             JeepneyRouteMatch? match = await _checkIfJeepneyCanServeTrip(
-  //               routeCode: code,
-  //               stopNames: stopNames,
-  //               stopCoordinates: coordinatesData,
-  //               userOriginLat: originLat,
-  //               userOriginLng: originLng,
-  //               userDestLat: destLat,
-  //               userDestLng: destLng,
-  //             );
-
-  //             if (match != null) {
-  //               routes.add(match);
-  //             }
-  //           }
-
-  //           routes.sort((a, b) => a.totalETA.compareTo(b.totalETA));
-  //           return routes;
-  //         }
-  //       }
-  //     }
-  //   } catch (e) {
-  //     logger.e('Error checking cache: $e');
-  //   }
-
-  //   return null;
-  // }
-
   Future<JeepneyRouteMatch?> _checkIfJeepneyCanServeTrip({
     required String routeCode,
     required List<String> stopNames,
@@ -249,10 +181,10 @@ class JeepneyRouteService {
     required double userDestLat,
     required double userDestLng,
   }) async {
-    const double maxWalkDistance = 0.3;
+    const double maxWalkDistance = 0.5;
 
-    StopMatch? boardingStop;
-    StopMatch? alightingStop;
+    List<StopMatch> possibleBoardingStops = [];
+    List<StopMatch> possibleAlightingStops = [];
 
     for (int i = 0; i < stopCoordinates.length; i++) {
       if (i >= stopNames.length) break;
@@ -266,56 +198,70 @@ class JeepneyRouteService {
       double stopLng = coord['lng'].toDouble();
       String stopName = stopNames[i];
 
-      if (boardingStop == null) {
-        double distanceToOrigin = _calculateDistance(
-          userOriginLat,
-          userOriginLng,
-          stopLat,
-          stopLng,
-        );
-
-        if (distanceToOrigin <= maxWalkDistance) {
-          boardingStop = StopMatch(
-            index: i,
-            name: stopName,
-            latitude: stopLat,
-            longitude: stopLng,
-            walkDistance: distanceToOrigin,
-          );
-        }
+      double distanceToOrigin = _calculateDistance(userOriginLat, userOriginLng, stopLat, stopLng);
+      if (distanceToOrigin <= maxWalkDistance) {
+        possibleBoardingStops.add(StopMatch(
+          index: i, 
+          name: stopName, 
+          latitude: stopLat, 
+          longitude: stopLng, 
+          walkDistance: distanceToOrigin
+        ));
       }
 
-      if (boardingStop != null && i > boardingStop.index) {
-        double distanceToDest = _calculateDistance(
-          userDestLat,
-          userDestLng,
-          stopLat,
-          stopLng,
-        );
+      double distanceToDest = _calculateDistance(userDestLat, userDestLng, stopLat, stopLng);
+      if (distanceToDest <= maxWalkDistance) {
+        possibleAlightingStops.add(StopMatch(
+          index: i, 
+          name: stopName, 
+          latitude: stopLat, 
+          longitude: stopLng, 
+          walkDistance: distanceToDest
+        ));
+      }
+    }
 
-        if (distanceToDest <= maxWalkDistance) {
-          alightingStop = StopMatch(
-            index: i,
-            name: stopName,
-            latitude: stopLat,
-            longitude: stopLng,
-            walkDistance: distanceToDest,
-          );
-          break;
+    if (possibleBoardingStops.isEmpty || possibleAlightingStops.isEmpty) {
+      //logger.i('Route $routeCode: No valid boarding or alighting stops found');
+      return null;
+    }
+
+    StopMatch? bestBoardingStop;
+    StopMatch? bestAlightingStop;
+    double bestScore = double.infinity;
+
+    for (var boardingStop in possibleBoardingStops) {
+      for (var alightingStop in possibleAlightingStops) {
+        if (boardingStop.index >= alightingStop.index) {
+          continue;
+        }
+
+        double score = boardingStop.walkDistance + alightingStop.walkDistance;
+
+        double rideDistance = _calculateDistance(boardingStop.latitude, boardingStop.longitude, alightingStop.latitude, alightingStop.longitude);
+
+        if (rideDistance < 0.5) {
+          score += 0.5;
+        }
+
+        if (score < bestScore) {
+          bestScore = score;
+          bestBoardingStop = boardingStop;
+          bestAlightingStop = alightingStop;
         }
       }
     }
 
-    if (boardingStop != null && alightingStop != null) {
+    if (bestBoardingStop != null && bestAlightingStop != null) {
       return await _buildRouteMatch(
-        routeCode: routeCode,
-        jeepneyStops: stopNames,
-        boardingStop: boardingStop,
-        alightingStop: alightingStop,
-        userOriginLat: userOriginLat,
-        userOriginLng: userOriginLng,
-        userDestLat: userDestLat,
-        userDestLng: userDestLng,
+        routeCode: routeCode, 
+        jeepneyStops: stopNames, 
+        boardingStop: bestBoardingStop, 
+        alightingStop: bestAlightingStop, 
+        userOriginLat: userOriginLat, 
+        userOriginLng: userOriginLng, 
+        userDestLat: userDestLat, 
+        userDestLng: userDestLng
       );
     }
 

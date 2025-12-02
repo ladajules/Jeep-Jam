@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
 
 class Auth{
-    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final logger =  Logger();
   User? get currentUser => _firebaseAuth.currentUser;
@@ -108,7 +108,7 @@ class Auth{
   }
 
   bool get isEmailVerified => currentUser?.emailVerified ?? false;
-Future<void> syncEmailIfChanged() async {
+  Future<void> syncEmailIfChanged() async {
     final user = currentUser;
     if (user != null) {
       await user.reload(); // Get latest email from Auth

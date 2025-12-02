@@ -82,6 +82,7 @@ class _RouteDialogState extends State<RouteDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Color(0xFFdea855),
       title: Text(widget.routeCode == null ? 'Add New Route' : 'Edit Route', style: TextStyle(fontWeight: FontWeight.w500),),
       content: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
@@ -95,10 +96,43 @@ class _RouteDialogState extends State<RouteDialog> {
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: _routeCodeController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Route Code',
                     hintText: 'e.g., 01B',
-                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 2
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),  
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.red,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.red,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+
+                    labelStyle: TextStyle(color: Color(0xFF6e2d1b)),
+                    hintStyle: TextStyle(color: Color(0xFF6e2d1b)),
                   ),
                   enabled: widget.routeCode == null,
                   textCapitalization: TextCapitalization.characters,
@@ -108,6 +142,9 @@ class _RouteDialogState extends State<RouteDialog> {
                     }
                     return null;
                   },
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -132,8 +169,8 @@ class _RouteDialogState extends State<RouteDialog> {
                   child: InkWell(
                     child: TextButton.icon(
                       onPressed: _addStop,
-                      icon: const Icon(Icons.add, color: Colors.blue,),
-                      label: const Text('Add Stop', style: TextStyle(color: Colors.blue),),
+                      icon: const Icon(Icons.add, color: Color(0xFF6e2d1b),),
+                      label: const Text('Add Stop', style: TextStyle(color: Color(0xFF6e2d1b)),),
                     ),
                   ),
                 ),
@@ -149,7 +186,10 @@ class _RouteDialogState extends State<RouteDialog> {
         ),
         ElevatedButton(
           onPressed: _save,
-          child: Text(widget.routeCode == null ? 'Add' : 'Save', style: TextStyle(color: Colors.blue),),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFFfef1d8),
+          ), 
+          child: Text(widget.routeCode == null ? 'Add' : 'Save', style: TextStyle(color: Color(0xFF6e2d1b)),),
         ),
       ],
     );
@@ -157,6 +197,7 @@ class _RouteDialogState extends State<RouteDialog> {
 
   Widget _buildStopField(int index, StopController stop) {
     return Card(
+      color: Color(0xFFfef1d8),
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -172,7 +213,7 @@ class _RouteDialogState extends State<RouteDialog> {
                 ),
                 if (_stops.length > 1)
                   IconButton(
-                    icon: const Icon(Icons.delete, size: 20),
+                    icon: const Icon(Icons.delete_outline, size: 20),
                     color: Colors.red,
                     onPressed: () => _removeStop(index),
                   ),
@@ -181,10 +222,31 @@ class _RouteDialogState extends State<RouteDialog> {
             const SizedBox(height: 8),
             TextFormField(
               controller: stop.nameController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Stop Name',
                 hintText: 'e.g., Ayala Center',
-                border: OutlineInputBorder(),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(
+                  color: Color(0xFF6e2d1b),
+                  width: 2,
+                ), borderRadius: BorderRadius.circular(8)),
+
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide(
+                  color: Color(0xFF6e2d1b),
+                  width: 2,
+                ), borderRadius: BorderRadius.circular(8)),
+
+                errorBorder: OutlineInputBorder(borderSide: BorderSide(
+                  color: Colors.red,
+                  width: 2,
+                ), borderRadius: BorderRadius.circular(8)),
+
+                focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(
+                  color: Colors.red,
+                  width: 2,
+                ), borderRadius: BorderRadius.circular(8)),
+
+                labelStyle: TextStyle(color: Color(0xFF6e2d1b)),
+                hintStyle: TextStyle(color: Color(0xFF6e2d1b)),
                 isDense: true,
               ),
               validator: (value) {
@@ -200,10 +262,31 @@ class _RouteDialogState extends State<RouteDialog> {
                 Expanded(
                   child: TextFormField(
                     controller: stop.latController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Latitude',
                       hintText: '10.3157',
-                      border: OutlineInputBorder(),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 2,
+                      ), borderRadius: BorderRadius.circular(8)),
+                      
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 2,
+                      ), borderRadius: BorderRadius.circular(8)),
+
+                      errorBorder: OutlineInputBorder(borderSide: BorderSide(
+                        color: Colors.red,
+                        width: 2,
+                      ), borderRadius: BorderRadius.circular(8)),
+
+                      focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(
+                        color: Colors.red,
+                        width: 2,
+                      ), borderRadius: BorderRadius.circular(8)),
+
+                      labelStyle: TextStyle(color: Color(0xFF6e2d1b)),
+                      hintStyle: TextStyle(color: Color(0xFF6e2d1b)),
                       isDense: true,
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
@@ -224,11 +307,32 @@ class _RouteDialogState extends State<RouteDialog> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextFormField(
-                    controller: stop.lngController,
-                    decoration: const InputDecoration(
+                    controller: stop.latController,
+                    decoration: InputDecoration(
                       labelText: 'Longitude',
                       hintText: '123.8854',
-                      border: OutlineInputBorder(),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 2,
+                      ), borderRadius: BorderRadius.circular(8)),
+                      
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 2,
+                      ), borderRadius: BorderRadius.circular(8)),
+
+                      errorBorder: OutlineInputBorder(borderSide: BorderSide(
+                        color: Colors.red,
+                        width: 2,
+                      ), borderRadius: BorderRadius.circular(8)),
+
+                      focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(
+                        color: Colors.red,
+                        width: 2,
+                      ), borderRadius: BorderRadius.circular(8)),
+
+                      labelStyle: TextStyle(color: Color(0xFF6e2d1b)),
+                      hintStyle: TextStyle(color: Color(0xFF6e2d1b)),
                       isDense: true,
                     ),
                     keyboardType: const TextInputType.numberWithOptions(

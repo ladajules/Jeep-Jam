@@ -44,6 +44,8 @@ class _HomePageState extends State<HomePage> {
   final FirebaseService _firebaseService = FirebaseService();
   bool _isLoadingSuggested = false;
   List<Map<String, dynamic>> _suggestedPlaces = [];
+  final PlaceCardUtils _placeCardUtils = PlaceCardUtils();
+  final BuildDivider _buildDivider = BuildDivider();
 
   Position? _currentPosition;
   Placemark? _currentAddress;
@@ -458,7 +460,6 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 16),
 
-
         // popular places / suggested places section)
         const Text(
           "Suggested Places",
@@ -492,12 +493,10 @@ class _HomePageState extends State<HomePage> {
             )
           : Column(
               children: _suggestedPlaces.map((place) {
-                // Check if it's a divider
                 if (place['isDivider'] == true) {
-                  return buildDivider(place['location']);
+                  return _buildDivider.buildDivider(place['location']);
                 }
-                // Otherwise it's a regular place
-                return buildPlaceCard(place);
+                return _placeCardUtils.buildPlaceCard(place);
               }).toList(),
             ),
           

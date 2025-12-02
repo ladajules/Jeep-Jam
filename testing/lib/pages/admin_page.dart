@@ -262,13 +262,15 @@ class _AdminPageState extends State<AdminPage> {
     }
 
     return Scaffold(
+      backgroundColor: Color(0xFFfef1d8),
       appBar: AppBar(
-        title: const Text('Admin Panel', style: TextStyle(fontWeight: FontWeight.w500),),
+        backgroundColor: Color(0xFFdea855),
+        title: const Text('Admin Panel', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white), ),
         elevation: 0,
         actions: [
           IconButton(onPressed:() {
             _auth.signOut();
-          }, icon: Icon(Icons.login_rounded)),
+          }, icon: Icon(Icons.login_rounded), color: Colors.white,),
         ],
       ),
       body: Column(
@@ -291,7 +293,7 @@ class _AdminPageState extends State<AdminPage> {
 
   Widget _buildTabBar() {
     return Container(
-      color: Colors.black,
+      color: Color(0xFFdea855),
       child: Row(
         children: [
           _buildTab('Overview', 0, Icons.dashboard),
@@ -329,7 +331,7 @@ class _AdminPageState extends State<AdminPage> {
                 style: TextStyle(
                   color: isSelected ? Colors.white : Colors.white70,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 12,
+                  fontSize: 14,
                 ),
               ),
             ],
@@ -362,10 +364,10 @@ class _AdminPageState extends State<AdminPage> {
                 mainAxisSpacing: 16,
                 childAspectRatio: crossAxisCount == 1 ? 2.5 : 1.2,
                 children: [
-                  StatCard(title: 'Total Routes', value: totalRoutes.toString(), icon: Icons.alt_route, color: Colors.blue),
-                  StatCard(title: 'Total Users', value: totalUsers.toString(), icon: Icons.people, color: Colors.teal),
-                  StatCard(title: 'Verified Users', value: verifiedUsers.toString(), icon: Icons.check_circle, color: Colors.green),
-                  StatCard(title: 'Unverified Users', value: unverifiedUsers.toString(), icon: Icons.warning, color: Colors.orange),
+                  StatCard(title: 'Total Routes', value: totalRoutes.toString(), icon: Icons.alt_route, color: Color(0xFF6e2d1b)),
+                  StatCard(title: 'Total Users', value: totalUsers.toString(), icon: Icons.people, color: Color(0xFF6e2d1b)),
+                  StatCard(title: 'Verified Users', value: verifiedUsers.toString(), icon: Icons.check_circle, color: Color(0xFF6e2d1b)),
+                  StatCard(title: 'Unverified Users', value: unverifiedUsers.toString(), icon: Icons.warning, color: Color(0xFF6e2d1b)),
                 ],
               );
             },
@@ -391,21 +393,35 @@ class _AdminPageState extends State<AdminPage> {
                   controller: _routeSearchController,
                   decoration: InputDecoration(
                     hintText: 'Search route code...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
+                    prefixIcon: Icon(Icons.search),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Color(0xFF6e2d1b),
+                        width: 2,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[100],
+                    fillColor: Colors.white,
+                    hintStyle: TextStyle(color: Color(0xFF6e2d1b))
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               ElevatedButton.icon(
                 onPressed: _showAddRouteDialog,
-                icon: const Icon(Icons.add, color: Colors.blue,),
-                label: const Text('Add Route', style: TextStyle(color: Colors.blue),),
+                icon: const Icon(Icons.add, color: Color(0xFF6e2d1b),),
+                label: const Text('Add Route', style: TextStyle(color: Color(0xFF6e2d1b)),),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 16,
@@ -443,15 +459,14 @@ class _AdminPageState extends State<AdminPage> {
                       itemCount: _filteredRoutes.length,
                       itemBuilder: (context, index) {
                         final route = _filteredRoutes[index];
-                        final stops =
-                            List<Map<String, dynamic>>.from(route['route']);
+                        final stops = List<Map<String, dynamic>>.from(route['route']);
                         return Card(
+                          color: Color(0xFFdea855),
                           margin: const EdgeInsets.only(bottom: 12),
                           child: ExpansionTile(
                             leading: CircleAvatar(
-                              backgroundColor:
-                                  Theme.of(context).primaryColor.withOpacity(0.1),
-                              foregroundColor: Colors.black,
+                              backgroundColor: Colors.white,
+                              foregroundColor: Color(0xFF6e2d1b),
                               child: const Icon(Icons.directions_bus),
                             ),
                             title: Text(
@@ -467,15 +482,15 @@ class _AdminPageState extends State<AdminPage> {
                               children: [
                                 InkWell(
                                   child: IconButton(
-                                    icon: const Icon(Icons.edit,
-                                        color: Colors.blue),
+                                    icon: const Icon(Icons.edit_outlined,
+                                        color: Color(0xFF6e2d1b)),
                                     onPressed: () => _showEditRouteDialog(route),
                                   ),
                                 ),
                                 InkWell(
                                   child: IconButton(
-                                    icon: const Icon(Icons.delete,
-                                        color: Colors.red),
+                                    icon: const Icon(Icons.delete_outline,
+                                        color: Color(0xFF6e2d1b)),
                                     onPressed: () =>
                                         _showDeleteDialog(route['code']),
                                   ),
@@ -530,11 +545,24 @@ class _AdminPageState extends State<AdminPage> {
             decoration: InputDecoration(
               hintText: 'Search by email...',
               prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Color(0xFF6e2d1b),
+                  width: 2,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
+
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Color(0xFF6e2d1b),
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: Colors.white,
             ),
           ),
         ),

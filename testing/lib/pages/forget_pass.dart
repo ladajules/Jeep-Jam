@@ -10,8 +10,8 @@ class ForgotPassword extends StatefulWidget{
 }
 
 class _ForgotPasswordState extends State<ForgotPassword> {
-final TextEditingController _emailController = TextEditingController();
-final Auth _auth = Auth();
+  final TextEditingController _emailController = TextEditingController();
+  final Auth _auth = Auth();
 
   String? _message;
   bool _isSuccess = false;

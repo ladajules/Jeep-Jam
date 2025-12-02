@@ -91,7 +91,7 @@ class UserDistributionCard extends StatelessWidget {
                   child: Container(
                     height: 20,
                     decoration: const BoxDecoration(
-                      color: Colors.green,
+                      color: Color(0xFF6e2d1b),
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(8),
                         bottomLeft: Radius.circular(8),
@@ -103,8 +103,8 @@ class UserDistributionCard extends StatelessWidget {
                   flex: (unverifiedPercentage * 100).toInt(),
                   child: Container(
                     height: 20,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
                       borderRadius: BorderRadius.only(
                         topRight: Radius.circular(8),
                         bottomRight: Radius.circular(8),
@@ -120,7 +120,7 @@ class UserDistributionCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.check_circle, color: Colors.green, size: 16),
+                    const Icon(Icons.check_circle, color: Color(0xFF6e2d1b), size: 16),
                     const SizedBox(width: 4),
                     Text(
                       'Verified: $verified (${(verifiedPercentage * 100).toStringAsFixed(1)}%)',

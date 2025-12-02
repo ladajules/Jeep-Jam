@@ -27,12 +27,23 @@ dependencies:
   firebase_auth: ^6.1.2
   cloud_firestore: ^6.1.0
   intl: ^0.20.2
+  flutter_native_splash: ^2.4.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^5.0.0
+
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+  background_image: assets/background_color.png
+  image: assets/splash_logo.png
+  android_12:
+    color: "#fef1d8"
+    image: assets/splash_logo.png
 
 flutter:
   uses-material-design: true
