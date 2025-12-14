@@ -1,16 +1,31 @@
-# testing
+# Jeep-Jam 🚌
 
-A new Flutter project.
+## 📌 Project Overview
+**Jeep-Jam** is a mobile application developed as a final project for the **Object-Oriented Programming (OOP)** course. The app is designed to **guide users to the right jeepney routes** between any two given points.
 
-## Getting Started
+The project utilizes **OOP principles** to model transportation concepts while integrating modern technologies such as **Flutter**, **Google Maps Platform**, and **Firebase**.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## 🎯 Project Objectives
+- To demonstrate the **four fundamental concepts of Object-Oriented Programming**
+- To apply OOP concepts to **solve a real-world problem** through mobile app development
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 💻 Technologies Used
+- **Flutter & Dart**
+- **Google Maps Platform**
+- **Firebase**
+
+--- 
+
+## 👥 Project Members
+- Frances Anna Gaea O. Mutia
+- Althea O. Telmo
+- Jules Niño Adrian L. Gimenez
+
+---
+
+## 📘 Academic Context
+This project was developed solely for educational purposes in the **OOP** course, prioritizing **application of OOP principles**, not commercial deployment.
