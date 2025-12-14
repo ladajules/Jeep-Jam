@@ -1,2 +1,6 @@
-# Here tayo magka gubot my dear friends
-<img src="https://media.tenor.com/TUJ_WGkQ6pcAAAAM/dog-computer.gif">
+#  Jeep jam hek yea 🚙
+## Members
+- Jules Adrian Nino Lada
+- Frances Anna Gaea Mutia
+- Althea Telmo
+### An Object Oriented Programming Project
