@@ -175,6 +175,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Color(0xfffef1d8),
         title: const Text('Delete Route'),
         content: Text('Delete "$routeName"?'),
         actions: [
@@ -211,6 +212,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
       final result = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
+          backgroundColor:  Color(0xfffef1d8),
           title: const Text('Save Current Route'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -240,7 +242,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.black,
+                    color: const Color.fromARGB(255, 255, 255, 255),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
@@ -284,7 +286,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                   decoration: BoxDecoration(
                     color: Colors.orange[50],
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.orange[200]!),
+                    border: Border.all(color:  Color(0xfffef1d8),),
                   ),
                   child: Row(
                     children: [
@@ -636,7 +638,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: const Color.fromARGB(255, 255, 255, 255),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -690,7 +692,7 @@ class _SavedRoutesState extends State<SavedRoutesPage>{
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Color(0xff6e2d1b),
+                            color: Color.fromARGB(255, 255, 255, 255),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
