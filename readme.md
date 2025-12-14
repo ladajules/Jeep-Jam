@@ -22,7 +22,7 @@ The project utilizes **OOP principles** to model transportation concepts while i
 
 ## 👥 Project Members
 - Frances Anna Gaea O. Mutia
-- Althea O. Telmo
+- Althea I. Telmo
 - Jules Niño Adrian L. Gimenez
 
 ---
