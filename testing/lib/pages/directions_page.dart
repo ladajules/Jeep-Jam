@@ -516,9 +516,9 @@ class _DirectionsPageState extends State<DirectionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xfffef1d8),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xfffef1d8),
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.pop(context), 
@@ -644,7 +644,7 @@ class _DirectionsPageState extends State<DirectionsPage> {
                     child: ElevatedButton(
                       onPressed: _handleSubmit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.withValues(alpha: 0.8),
+                        backgroundColor: Color(0xff6e2d1b),
                         foregroundColor: Colors.white,
                         elevation: 2,
                         shape: RoundedRectangleBorder(
@@ -675,7 +675,7 @@ class _DirectionsPageState extends State<DirectionsPage> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Color(0xfffef1d8),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -722,7 +722,7 @@ class _DirectionsPageState extends State<DirectionsPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.withValues(alpha: 0.8) : Colors.white,
+          color: isSelected ? Color(0xffdea855) : Color(0xfffef1d8),
           borderRadius: BorderRadius.circular(20),
         ),
 

@@ -32,12 +32,12 @@ class PlaceCardUtils {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.blue[100],
+                  color: const Color.fromARGB(102, 212, 149, 126),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.place,
-                  color: Colors.blue[700],
+                  color: Color(0xff6e2d1b),
                   size: 30,
                 ),
               ),
